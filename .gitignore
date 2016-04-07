@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+Icon?
+.DS_Store
+*.xlsx
+*.PNG
+*.pdf
+white_example_2.R
+CPUE_bootstrap_project.R
+CPUE_SAnderson_HURDLE.R
