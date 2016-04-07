@@ -1,5 +1,5 @@
 ---
-title: "Bootstrapping CPUE"
+title: "Bootstrapping ziCPUE data"
 author: "Lucas A. Nell"
 date: "March 31, 2016"
 output:
@@ -20,49 +20,24 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 ```
 
 
-```{r preamble}
-library('dplyr')
+# Initial setup
+
+The following packages are required:
+
+```{r packages}
+library('dplyr', quietly = TRUE)
 library('readxl')
 library('ggplot2')
 library('boot')
 library('broom')
 library('RColorBrewer')
-
-# Function to specify type of bootstrapping and simulations in ggplot2 plots
-ggBootCI <- function(x, B = 1e4, CI_method = 'bca'){
-  # These methods have full-length versions for their output list names
-  if (method %in% c('norm', 'stud', 'perc')){
-    outListMethod <- gsub('norm', 'normal', method) %>%
-      gsub('stud', 'student', .) %>%
-      gsub('perc', 'percent', .)
-  } else {
-    outListMethod <- method
-  }
-  
-  bt.mean <- function(x, ind){
-    return(c(mean(x[ind]),
-             var(x[ind])/length(ind)))}
-  inner.boot <- boot(x, statistic=bt.mean, R=B)
-  
-  # If all resamples return the same value, output df will be simply that value x3
-  if (diff(range(inner.boot$t)) == 0){
-    result <- data.frame(ymin = range(inner.boot$t)[1], 
-                         y = range(inner.boot$t)[1], 
-                         ymax = range(inner.boot$t)[1])
-  } else {
-  # If not, then run `boot.ci` from `boot` package
-    inner.ci <- boot.ci(inner.boot, type=paste(method))
-    result_tmp <- rev(inner.ci[[outListMethod]])[c(2,1)]
-    result <- data.frame(ymin = result_tmp[1], 
-                         y = median(inner.boot$t), 
-                         ymax = result_tmp[2])
-  }
-  return(result)
-}
 ```
 
+
+Read, clean, and add necessary columns to the table in `brett_example.xlsx`.
+
 ```{r inputData}
-RGSM_CPUE <- read_excel("brett_example.xlsx",1) %>% 
+CPUE_df <- read_excel("brett_example.xlsx",1) %>% 
   rename(Area = `Effort m^2`, Count = SumOfSPEC) %>%
   filter(Year %in% 1993:2013, !is.na(Year), Month == 10, !is.na(Month)) %>%
   select(Year, Month, Station, Count, Area) %>%
@@ -70,21 +45,71 @@ RGSM_CPUE <- read_excel("brett_example.xlsx",1) %>%
   arrange(Year)
 ```
 
+
+
+To have better control of bootstrapping within `ggplot2` plots, the following function
+allows you to use bootstrapping and CI calculations via the `boot` package. The 
+`CI_method` parameter takes the following inputs, inherited from the `boot.ci` function:
+"norm","basic", "stud", "perc", or "bca".
+
+``` {r ggBootCI}
+ggBootCI <- function(inputData, B = 1e4, CI_method = 'bca'){
+  # List names in the `boot.ci` output for these methods differ from their input names
+  if (method %in% c('norm', 'stud', 'perc')){
+    outListMethod <- gsub('norm', 'normal', method) %>%
+      gsub('stud', 'student', .) %>%
+      gsub('perc', 'percent', .)
+  } else {
+    outListMethod <- method
+  }
+  # Inner function to compute mean and variance of the sampling distribution of the mean
+  # for each bootstrap replication
+  btMean <- function(inputData, ind){
+    m <- mean(inputData[ind])
+    n <- length(ind)
+    v <- var(inputData[ind]) / n
+    return(c(m, n))
+  }
+  
+  bootstraps <- boot(inputData, statistic = btMean, R = B)
+  
+  # If all resamples return the same value, output df will simply be that value x3:
+  if (diff(range(bootstraps$t)) == 0){
+    result <- range(bootstraps$t)[1] %>%
+      data.frame(ymin = ., y = ., ymax = .)
+  } else { # If not, then run `boot.ci`:
+    boot.ci_output <- boot.ci(bootstraps, type = method)
+    bootCI <- rev(boot.ci_output[[outListMethod]])[c(2,1)]
+    result <- data.frame(ymin = bootCI[1], 
+                         y = median(bootstraps$t), 
+                         ymax = bootCI[2])
+  }
+  
+  return(result)
+}
+```
+
+
+For bootstrapping seamlessly with `dplyr`, the package `broom` provides the function
+`boostrap`. However, this function samples from all columns regardless of grouping. I've
+hacked the original function (found [here](
+https://cran.r-project.org/web/packages/broom/vignettes/bootstrapping.html)) to sample 
+within a given grouping. Let's say, for example, you group by a variable called `type` 
+and in the original sample, `type`s 1, 2, and 3  have sample sizes of 10, 20, and 30,
+respectively. This function would randomly sample  exactly 10 items from the original 
+dataset (with replacement) that are of `type` 1, 20 of `type` 2, and 30 of `type` 3.
+
 ```{r bootstrappingFuns}
 # Function to sample row numbers from a numeric vector of sample sizes by group
 stratSample <- function(group_n){
-  
   ends <- cumsum(group_n)
   starts <- c(1, ends[-length(ends)] - 1)
-  
-  unlist(lapply(seq(length(ends)), function(i){
+  bootRows <- unlist(lapply(seq(length(ends)), function(i){
     sample(seq(starts[i], ends[i]), replace = TRUE)}))
+  return(bootRows)
 }
 
-# To open an issue on broom's GitHub: https://github.com/dgrtwo/broom
 
-# Tweaking broom::bootstrap function to allow for seamless bootstrapping stratified by 
-# a group (in this case, the 'Year' column)
 stratBootstrap <- function(df, m, group) {
   
   df <- df %>% arrange_(group)
@@ -116,7 +141,7 @@ stratBootstrap <- function(df, m, group) {
 ```{r bootstrapping}
 # Bootstrapping mean CPUE values
 set.seed(9721)
-CPUE_boot <- RGSM_CPUE %>%
+CPUE_boot <- CPUE_df %>%
   stratBootstrap(1000, group = 'Year') %>%
   do(summarize(group_by(., Year), CPUE = mean(CPUE))) %>% 
   # To strip attributes:
@@ -130,6 +155,9 @@ CPUE_bootSumm <- CPUE_boot %>%
 
 CPUE_bootSumm
 ```
+
+
+
 
 ```{r plots}
 
@@ -149,12 +177,12 @@ plotTheme <- function(base_size = 10, base_family = 'Helvetica') {
 }
 
 # Color palette for Year
-myPalette <- RGSM_CPUE$Year %>% 
+myPalette <- CPUE_df$Year %>% 
   unique %>% length %>% 
   colorRampPalette(brewer.pal(8,  'Dark2'))(.)
 
 
-bootPlot <- RGSM_CPUE %>%
+bootPlot <- CPUE_df %>%
   ggplot(aes(x = factor(Year), y = CPUE, color = factor(Year))) +
   plotTheme() +
   scale_y_continuous(expression(Mean ~ Catch ~ 100 ~ m^{-2}), trans = 'log10',
@@ -162,7 +190,7 @@ bootPlot <- RGSM_CPUE %>%
                      limits = c(0.001, 1000),
                      labels = function(n){format(n, scientific = FALSE, 
                                                  drop0trailing = TRUE)}) +
-  scale_x_discrete('Year', breaks = seq(min(RGSM_CPUE$Year), max(RGSM_CPUE$Year))) +
+  scale_x_discrete('Year', breaks = seq(min(CPUE_df$Year), max(CPUE_df$Year))) +
   scale_color_manual(values = myPalette)
 
 bootPlot +
@@ -183,9 +211,6 @@ bootPlot +
 
 
 ```{r testing}
-
-
-
 
 
 
