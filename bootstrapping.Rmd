@@ -3,12 +3,12 @@ title: "Bootstrapping ziCPUE data"
 author: "Lucas A. Nell"
 date: "March 31, 2016"
 output:
-  pdf_document:
-    highlight: haddock
-    latex_engine: xelatex
   html_document:
     highlight: haddock
     theme: journal
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
 mainfont: Helvetica
 geometry: margin=1in
 fontsize: 10pt
@@ -118,7 +118,7 @@ CPUEbootSumm
 # Plotting
 
 
-These are just some asthetic pieces that I often employ. They're included here in case
+These are just some aesthetic pieces that I often employ. They're included here in case
 others are interested.
 
 ```{r plotPreamble}
