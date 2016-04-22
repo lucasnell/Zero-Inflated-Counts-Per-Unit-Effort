@@ -1,22 +1,68 @@
+---
+title: "Compiling ziCPUE data"
+author: "Lucas A. Nell"
+date: "April 22, 2016"
+output:
+  html_document:
+    highlight: haddock
+    theme: journal
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+mainfont: Helvetica
+geometry: margin=1in
+fontsize: 10pt
+runtime: shiny
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+# Setup
+
+### Required packages:
+```{r libraries, message = FALSE}
 library("dplyr")
 library("tidyr")
 library("readxl")
 library("stringr")
-# library("reshape2")
-# library("broom")
+```
 
+### Reading files
+The `compiling_preamble.R` file inputs tables into `tbl_df`s named 
+`Apal`, `Suwa`, `Pearl`, and `Pasc`. I did this separately to keep names private.
+```{r inputs}
 options(stringsAsFactors = FALSE)
 source('compiling_preamble.R')
-
-# Input data frames: Apal, Suwa, Pearl, Pasc
-
-
-# ================
-# Apalach
-# ================
+```
 
 
+In `compiling_preamble.R`, files were read and nothing else, as such:
+```{r, eval = FALSE}
+read_excel("FILENAME.xlsx")
+read.csv("FILENAME.csv") %>% as.tbl
+```
+
+
+
+# Standardizing data frames
+
+Each data frame was unique in its column names and overall setup. Below are some goals
+we needed to achieve:
+
+1. We needed as many of the following columns as possible: `Site`, `Date`, `V_TagID`,
+   `V_Serial`, `PIT_Tag1`, `PIT_Tag2`, `TL_mm`, and `FL_mm`. These needed to be renamed
+   and selected for.
+2. We had to convert the `FL` and `TL` columns from cm to mm.
+3. Standardize `Site` names.
+4. Remove rows with missing `V_TagID`.
+5. Standardize `Date` column.
+
+### Apalach
+This one had many unneeded columns also, hence the `select` command at the 
+beginning.
+``` {r manApal}
 Apal <- Apal %>%
   select(1:21) %>%
   rename(PIT_Tag1 = PIT_New, PIT_Tag2 = Pit_Old) %>%
@@ -26,14 +72,15 @@ Apal <- Apal %>%
     Date = as.Date(Date),
     Site = str_replace(Site, '_', ' ') %>% str_to_title
   ) %>%
-  filter(!is.na(V_TagID)) %>%
-  select(Site, Date, V_TagID, V_Serial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
+  select(Site, Date, V_TagID, V_Serial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm) %>%
+  filter(!is.na(V_TagID))
+```
 
 
-# ================
-# Suwannee
-# ================
+### Suwannee
 
+
+``` {r manSuwa}
 Suwa <- Suwa %>%
   rename(
     V_TagID = `ACOUSTIC TAG #`,
@@ -48,14 +95,14 @@ Suwa <- Suwa %>%
     Date = as.Date(Date),
     Site = str_replace(Site, '_', ' ') %>% str_to_title
   ) %>%
-  select(Site, Date, V_TagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
+  select(Site, Date, V_TagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm) %>%
+  filter(!is.na(V_TagID))
+```
 
 
+### Pearl
 
-# ================
-# Pearl
-# ================
-
+``` {r manPearl}
 Pearl <- Pearl %>% 
   as.tbl %>% 
   mutate(
@@ -69,15 +116,13 @@ Pearl <- Pearl %>%
     PIT_Tag1 = Pit.Tag,
     PIT_Tag2 = old_Pit_tag
   ) %>%
-  select(Site, Date, V_TagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
+  select(Site, Date, V_TagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm) %>%
+  filter(!is.na(V_TagID))
+```
 
+### Pascagoula
 
-
-# ================
-# Pascagoula
-# ================
-
-
+``` {r manPasc}
 Pasc <- Pasc %>%
   mutate(
     Date = as.Date(Date_Tagged),
@@ -89,18 +134,20 @@ Pasc <- Pasc %>%
     V_TagID = Tag_ID,
     PIT_Tag1 = `Pit Tag`
   ) %>%
-  select(Site, Date, V_TagID, PIT_Tag1, TL_mm, FL_mm)
+  select(Site, Date, V_TagID, PIT_Tag1, TL_mm, FL_mm) %>%
+  filter(!is.na(V_TagID))
+```
 
 
 
-# ================================
-# ================================
 
-#     Gathering by PIT and combining
+# Gathering by PIT and combining
 
-# ================================
-# ================================
 
+
+
+
+``` {r, eval = F}
 
 
 # Input data frames: Apal, Suwa, Pearl, Pasc
@@ -133,5 +180,5 @@ allSites %>%
   unlist %>% as.numeric %>% 
   table
 
-
+```
 
