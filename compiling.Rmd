@@ -231,8 +231,9 @@ equiv_vTagID_oneRow <- vTagID_PIT %>%
   select(vTagID_1, vTagID_2, vTagID_3)
 ```
 
-For easier lookup, I expanded the table so that every vTagID that was part of an 
-equivalent pair/trio was present in the first column, `"prim"`.
+For easier lookup, I expanded the table so that every `vTagID` that was part of an 
+equivalent pair/trio was present in the first column, `"prim"`. Columns `"second"` 
+and `"tert"` contain the other(s) in the pair/trio.
 
 ```{r equiv_vTagID}
 equiv_vTagID <- list(
@@ -244,7 +245,8 @@ equiv_vTagID <- list(
     select(prim = 1, second = 2, tert = 3) %>% na.omit
   ) %>%
   bind_rows()
-# `equiv_vTagID_oneRow` no longer needed...
+
+# Object `equiv_vTagID_oneRow` no longer needed...
 rm(equiv_vTagID_oneRow)
 ```
 
@@ -264,6 +266,9 @@ rm(equiv_vTagID_oneRow)
 
 
 
+# Filtering for valid `vTagID`s
+
+
 
 ```{r valid_vTagIDs}
 # A data frame of all observations with known vTagID or PIT_Tag
@@ -281,7 +286,7 @@ list((allSites %>% filter(!is.na(vTagID))),
 
 
 
-``` {r, eval = F}
+``` {r testingArea, eval = F, echo = F}
 
 allSites %>%
   group_by(PIT_Tag) %>%
