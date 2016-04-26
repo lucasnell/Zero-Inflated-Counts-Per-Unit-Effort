@@ -15,7 +15,7 @@ fontsize: 10pt
 runtime: shiny
 ---
 
-```{r setup, include=FALSE}
+```{r setup, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = '', prompt = FALSE)
 ```
 
@@ -34,21 +34,24 @@ options(dplyr.print_max = 5, dplyr.width = Inf)
 ```
 
 ### Reading files
-The `compiling_preamble.R` file inputs tables into `tbl_df`s named 
-`Apal`, `Suwa`, `Pearl`, and `Pasc`. I did this separately to keep names private.
+
+We are reading input files to `tbl_df`s named `Apal`, `Suwa`, `Pearl`, and `Pasc`.
+
 ```{r inputs}
 options(stringsAsFactors = FALSE)
-source('compiling_preamble.R')
+Apal <- suppressWarnings(
+  read_excel(
+    "~/Google Drive/Gulf sturgeon/Adam/Final NRDA_Blood.xlsx"))
+Suwa <- read_excel(
+  "~/Google Drive/Gulf sturgeon/Randall/Melissa/Copy of Suwannee.xlsx", 
+  2)
+Pearl <- read.csv(
+  "~/Google Drive/Gulf sturgeon/Western/PR_Master_Sturgeon_only.csv", 
+  na.strings = '') %>% 
+  as.tbl
+Pasc <- read_excel(
+  "~/Google Drive/Gulf sturgeon/Western/Copy of MSP_GS_Tagdata_Pascagoula.xlsx")
 ```
-
-
-In `compiling_preamble.R`, files were read and nothing else. Examples for Excel and 
-csv files, respectively:
-```{r, eval = FALSE}
-read_excel("FILENAME.xlsx")
-read.csv("FILENAME.csv") %>% as.tbl
-```
-
 
 
 # Standardizing data frames
@@ -61,7 +64,6 @@ for the output data frames:
    were converted using `rename` and selected for output using `select`) 
 2. Convert the `FL` and `TL` columns from cm to mm
 3. Standardize `Site` names and `Date` formats
-<!-- 4. Remove rows with missing `vTagID` -->
 
 ### Apalach
 This one also had many unneeded columns, hence the `select` command at the 
