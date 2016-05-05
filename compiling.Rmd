@@ -47,7 +47,7 @@ Suwa <- read_excel(
   2)
 Pearl <- read.csv(
   "~/Google Drive/Gulf sturgeon/Western/PR_Master_Sturgeon_only.csv", 
-  na.strings = '') %>% 
+  na.strings = c('NA', '')) %>% 
   as.tbl
 Pasc <- read_excel(
   "~/Google Drive/Gulf sturgeon/Western/Copy of MSP_GS_Tagdata_Pascagoula.xlsx")
@@ -167,16 +167,19 @@ allSites
 ```
 
 
-I next want to figure out how many unique PIT Tag numbers are associated with 
-`vTagID`s. The max appears to be 4.
+I next want to figure out how many unique `PIT_Tag`s are associated with 
+`vTagID`s, and vice versa. The max appears to be 3 for both.
 
 ```{r uniqueV_Tags_PITs}
+# Table of unique PIT_Tags per vTagID
 allSites %>% 
+  filter(!is.na(vTagID)) %>%
   group_by(vTagID) %>%
   summarize(uniquePITs = length(unique(PIT_Tag))) %>%
   select(uniquePITs) %>% 
   table
 
+# Table of unique vTagIDs per PIT_Tag
 allSites %>%
   filter(!is.na(vTagID)) %>%
   group_by(PIT_Tag) %>%
@@ -192,7 +195,8 @@ allSites %>%
 To easily access all identifying keys for each individual, I had to pair each `vTagID`
 with all the `PIT_Tag`(s) associated with them. Because I had some instances of multiple 
 `V_TagID`s for a given individual (based on `PIT_Tag`s), I also had to create a lookup
-table for those instances and expand the `vTagID`--`PIT_Tag` table to account for these additional `PIT_Tag`s.
+table for those instances and expand the `vTagID`--`PIT_Tag` table to account for these 
+additional `PIT_Tag`s.
 
 
 ### `PIT_Tag`s paired with each `vTagID`
@@ -233,7 +237,8 @@ equiv_vTagID_oneRow <- vTagID_PIT %>%
 
 For easier lookup, I expanded the table so that every `vTagID` that was part of an 
 equivalent pair/trio was present in the first column, `"prim"`. Columns `"second"` 
-and `"tert"` contain the other(s) in the pair/trio.
+and `"tert"` contain the other(s) in the pair/trio. I lastly converted all columns to 
+numeric for compatibility with the `allSites` data frame.
 
 ```{r equiv_vTagID}
 equiv_vTagID <- list(
@@ -244,16 +249,31 @@ equiv_vTagID <- list(
   equiv_vTagID_oneRow %>% select(3, 1, 2) %>% 
     select(prim = 1, second = 2, tert = 3) %>% na.omit
   ) %>%
-  bind_rows()
+  bind_rows() %>%
+  mutate(prim = as.numeric(prim),
+         second = as.numeric(second),
+         tert = as.numeric(tert))
 
 # Object `equiv_vTagID_oneRow` no longer needed...
-rm(equiv_vTagID_oneRow)
+# rm(equiv_vTagID_oneRow)
 ```
 
 
 
 
+### Getting metadata for captures with duplicate `vTagID`s
 
+
+```{r getDups}
+dups <- allSites %>%
+  filter(vTagID %in% equiv_vTagID$prim) %>% 
+  arrange(PIT_Tag, vTagID) %>%
+  as.data.frame
+dups
+
+# write.csv(dups, 'duplicate_vTagIDs.csv', quote = FALSE)
+
+```
 
 
 
@@ -268,7 +288,7 @@ rm(equiv_vTagID_oneRow)
 
 # Filtering for valid `vTagID`s
 
-
+*Note* This area is not yet fully documented...
 
 ```{r valid_vTagIDs}
 # A data frame of all observations with known vTagID or PIT_Tag
@@ -287,6 +307,8 @@ list((allSites %>% filter(!is.na(vTagID))),
 
 
 ``` {r testingArea, eval = F, echo = F}
+
+# Just for testing pieces of code...
 
 allSites %>%
   group_by(PIT_Tag) %>%
