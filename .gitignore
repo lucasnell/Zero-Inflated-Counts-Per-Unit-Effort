@@ -13,3 +13,4 @@ CPUE_SAnderson_HURDLE.R
 testing.R
 fish
 compiling_preamble.R
+*.csv
