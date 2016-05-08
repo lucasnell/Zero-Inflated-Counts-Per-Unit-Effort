@@ -14,3 +14,4 @@ testing.R
 fish
 compiling_preamble.R
 *.csv
+*.Rproj
