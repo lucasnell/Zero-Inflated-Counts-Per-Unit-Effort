@@ -10,8 +10,7 @@ White_1977.pdf
 white_example_2.R
 CPUE_bootstrap_project.R
 CPUE_SAnderson_HURDLE.R
-testing.R
 fish
-compiling_preamble.R
 *.csv
 *.Rproj
+*.html

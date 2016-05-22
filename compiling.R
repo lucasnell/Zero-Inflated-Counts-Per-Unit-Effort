@@ -1,3 +1,6 @@
+# Raw R code chunks for 'compiling.Rmd'
+
+
 
 ## @knitr libraries
 library("dplyr")
@@ -9,20 +12,19 @@ library("readr")
 
 ## @knitr inputs
 Apal <- suppressWarnings(
-    read_excel(
-        "~/Google Drive/Gulf sturgeon/Adam/Final NRDA_Blood.xlsx"))
-Suwa <- read_excel(
-    "~/Google Drive/Gulf sturgeon/Randall/Melissa/Copy of Suwannee.xlsx", 
-    2)
-Pearl <- read_csv(
-    "~/Google Drive/Gulf sturgeon/Western/PR_Master_Sturgeon_only.csv",
-    locale = locale(date_format = "%m/%d/%Y"))
-Pasc <- read_excel(
-    "~/Google Drive/Gulf sturgeon/Western/Copy of MSP_GS_Tagdata_Pascagoula.xlsx")
-Choc <- read_csv(
-    "~/Google Drive/Gulf sturgeon/Choctawhatchee/Choc_Sturgeon_trans_2010_12.csv.gz", 
-    locale = locale(date_format = "%m/%d/%y"))
-
+    read_excel(paste0("~/Google Drive/Gulf sturgeon/Adam/Final NRDA_Blood.xlsx")))
+Suwa <- read_excel(paste0("~/Google Drive/Gulf sturgeon/Randall/Melissa/",
+                          "Copy of Suwannee.xlsx"), 
+                   sheet = 2)
+Pearl <- read_csv(paste0("~/Google Drive/Gulf sturgeon/Western/",
+                         "PR_Master_Sturgeon_only.csv"),
+                  locale = locale(date_format = "%m/%d/%Y"))
+Pasc <- read_excel(paste0("~/Google Drive/Gulf sturgeon/Western/",
+                          "Copy of MSP_GS_Tagdata_Pascagoula.xlsx"))
+Choc <- suppressWarnings(
+    read_excel(paste0("~/Google Drive/Gulf sturgeon/Choctawhatchee/",
+                      "Choc_Sturgeon_transmitter_2010_2012.xlsx"), 
+               na = 'NA'))
 
 
 ## @knitr manApal
