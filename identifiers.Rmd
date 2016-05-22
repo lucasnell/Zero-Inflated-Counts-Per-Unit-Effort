@@ -1,0 +1,37 @@
+---
+title: "Identifiers"
+author: "Lucas A. Nell"
+date: "May 22, 2016"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 2
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+mainfont: Helvetica
+geometry: margin=1in
+fontsize: 10pt
+runtime: shiny---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = '', prompt = FALSE)
+```
+
+# Setup
+
+## Required packages
+```{r libraries, message = FALSE}
+library("dplyr")
+library("tidyr")
+library("readxl")
+library("stringr")
+library("readr")
+```
+
+
+
+

@@ -1,7 +1,7 @@
 ---
 title: "Compiling ziCPUE data"
 author: "Lucas A. Nell"
-date: "April 22, 2016"
+date: "May 22, 2016"
 output:
   html_document:
     highlight: haddock
@@ -20,6 +20,7 @@ runtime: shiny
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = '', prompt = FALSE)
+knitr::read_chunk('compiling.R')
 ```
 
 # Setup
@@ -33,29 +34,11 @@ library("stringr")
 library("readr")
 ```
 
-```{r dplyrSetup, echo = FALSE}
-options(dplyr.print_max = 5, dplyr.width = Inf)
-```
-
-## Reading files
+# Reading files
 
 We are reading input files to `tbl_df`s named `Apal`, `Suwa`, `Pearl`, `Pasc`, and `Choc`.
 
 ```{r inputs}
-Apal <- suppressWarnings(
-    read_excel(
-        "~/Google Drive/Gulf sturgeon/Adam/Final NRDA_Blood.xlsx"))
-Suwa <- read_excel(
-    "~/Google Drive/Gulf sturgeon/Randall/Melissa/Copy of Suwannee.xlsx", 
-    2)
-Pearl <- read_csv(
-    "~/Google Drive/Gulf sturgeon/Western/PR_Master_Sturgeon_only.csv",
-    locale = locale(date_format = "%m/%d/%Y"))
-Pasc <- read_excel(
-    "~/Google Drive/Gulf sturgeon/Western/Copy of MSP_GS_Tagdata_Pascagoula.xlsx")
-Choc <- read_csv(
-    "~/Google Drive/Gulf sturgeon/Choctawhatchee/Choc_Sturgeon_trans_2010_12.csv.gz", 
-    locale = locale(date_format = "%m/%d/%y"))
 ```
 
 
@@ -74,91 +57,24 @@ were converted using `rename` and selected for output using `select`)
 This one also had many unneeded columns, hence the `select` command at the 
 beginning.
 ``` {r manApal}
-Apal <- Apal %>%
-    select(1:21) %>%
-    rename(
-        PIT_Tag1 = PIT_New, 
-        PIT_Tag2 = Pit_Old,
-        vTagID = V_TagID,
-        vSerial = V_Serial) %>%
-    mutate(
-        FL_mm = FL_cm*10, 
-        TL_mm = TL_cm*10,
-        Date = as.Date(Date),
-        Site = gsub('_', ' ', Site) %>% str_to_title
-    ) %>%
-    select(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
 ```
 
 ## Suwannee
 ``` {r manSuwa}
-Suwa <- Suwa %>%
-    rename(
-        vTagID = `ACOUSTIC TAG #`,
-        PIT_Tag1 = `TAG 9    PIT TAG (ANTERIOR D FIN BASE)`,
-        PIT_Tag2 = `TAG 10 EXTRA  OR AUX PIT TAG (INCL EXTRA PIT TAG 2)`,
-        TL_mm = `TL mm`,
-        FL_mm = `FL mm`,
-        Site = `RIVER SYS`,
-        Date = DATE
-    ) %>%
-    mutate(
-        Date = as.Date(Date),
-        Site = gsub('_', ' ', Site) %>% str_to_title
-    ) %>%
-    select(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
 ```
 
 ## Pearl
 ``` {r manPearl}
-Pearl <- Pearl %>% 
-    mutate(
-        Date = as.Date(Date),
-        Site = "Pearl", 
-        FL_mm = `FL-cm`*10, 
-        TL_mm = `TL-cm`*10
-    ) %>%
-    rename(
-        vTagID = Tel_tag_code, 
-        PIT_Tag1 = `Pit Tag`,
-        PIT_Tag2 = old_Pit_tag
-    ) %>%
-    select(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
 ```
 
 ## Pascagoula
 ``` {r manPasc}
-Pasc <- Pasc %>%
-    mutate(
-        Date = as.Date(Date_Tagged),
-        Site = "Pascagoula",
-        FL_mm = `FL(cm)`*10,
-        TL_mm = `TL(cm)`*10
-    ) %>%
-    rename(
-        vTagID = Tag_ID,
-        PIT_Tag1 = `Pit Tag`
-    ) %>%
-    select(Site, Date, vTagID, PIT_Tag1, TL_mm, FL_mm)
 ```
 
 
 ## Choc
 
 ```{r manChoc}
-Choc <- Choc %>%
-    mutate(
-        FL_mm = `Fork Length (cm)`*10,
-        TL_mm = `Total Length (cm)`*10,
-        Date = as.Date(`Date Tagged/landed`),
-        Site = "Choctawhatchee River"
-    ) %>%
-    rename(
-        vTagID = `VEMCO Tag #`,
-        PIT_Tag1 = `New PIT Tag #`,
-        PIT_Tag2 = `Existing Pit Tag #`
-    ) %>%
-    select(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
 ```
 
 
@@ -168,28 +84,18 @@ Choc <- Choc %>%
 The below function uses `gather` to gather `PIT_Tag1` and `PIT_Tag2` into a single
 `PIT_Tag` column, resulting in more rows but "tidier" data. This tidiness allows me to 
 more easily combine the data frames into one and to match `PIT_Tag`s with `vTagID`s. 
-The filter operation removes rows where `PIT_Tag == NA` and the associated
+The filter operation removes rows where `is.na(PIT_Tag)` and the associated
 `vTagID`--`Date` combination has already been represented in another row. 
 I removed `PIT_name` because it is useless for downstream processes.
 
 ``` {r gatherFun}
-gatherByPIT <- function(df){
-    df %>%
-        gather(PIT_name, PIT_Tag, starts_with('PIT_Tag', ignore.case = FALSE)) %>%
-        filter(PIT_name == 'PIT_Tag1' | !is.na(PIT_Tag)) %>%
-        select(-PIT_name)
-}
 ```
 
 
 Now we run the function on all data frames and combine them into one. Since I made the 
 data frames exactly the same above, combining them now is quite simple.
 ```{r runGather}
-allSites <- lapply(list(Apal, Suwa, Pearl, Pasc, Choc), gatherByPIT) %>% 
-    bind_rows
-allSites
 ```
-
 
 
 
@@ -225,9 +131,10 @@ allSites %>%
 
 ## `PIT_Tag`--`vTagID` pairs
 
-I needed to create a data frame of all unique `vTagID`--`PIT_Tag` pairs, so that it
-doesn't have to be created for every single lookup (which would be a real time-waster).
-Because some `PIT_Tag`s match with multiple `vTagID`s, I have expanded this data frame
+I needed to create a data frame of all unique `vTagID`--`PIT_Tag` pairs, so that this 
+data frame doesn't have to be created for every single lookup (which would be a real
+time-waster).
+Because some `PIT_Tag`s match with multiple `vTagID`s, I will expand this data frame
 below to account for this.
 
 ```{r vTag_PIT_lookup_DF}
@@ -237,13 +144,14 @@ vTagID_PIT <- allSites %>%
         select(vTagID, PIT_Tag)
 ```
 
+
+## Lookup functions
+
 I next created functions to look up all equivalent `PIT_Tags` for a given `vTagID`, 
-and vice versa, from the `vTagID_PIT` data frame. I will later be adding rows to
-`vTagID_PIT`, and even though I am creating these functions now, they will use the
-updated version of `vTagID_PIT` if they're called after the changes are made to the 
-data frame. I intentionally wrote `PIT_to_vTagID` so that it will return an error
-if multiple `vTagID`s match to the given `PIT_Tag`, because we have yet to settle on how
-to deal with these.
+and vice versa, from the `vTagID_PIT` data frame. 
+I will later be adding rows to the `vTagID_PIT` reference data frame, and even 
+though I am creating these functions now, they will use the updated version of
+`vTagID_PIT` if they're called after the changes are made to the data frame.
 
 ```{r vTag_PIT_lookup_Funs}
 vTagID_to_PITs <- function(in_vTagID){
@@ -257,9 +165,6 @@ PIT_to_vTagID <- function(in_PIT){
     out_vTagID <- (vTagID_PIT %>%
                        filter(PIT_Tag == as.character(in_PIT)) %>%
                        select(vTagID))[[1]]
-    if (length(out_vTagID) > 1){
-        stop('Multiple vTagID values returned.')
-    }
     return(out_vTagID)
 }
 ```
@@ -267,50 +172,94 @@ PIT_to_vTagID <- function(in_PIT){
 
 ## Equivalent `vTagID`s
 
-Based on `PIT_Tag`s, some `vTagID` values represented the same individual. In case 
-these need to be looked up, I've created a table to do just that. I first created a table
-of these equivalent `vTagID`s, one row per equivalent pair/trio, including the `PIT_Tag`
-associated with each pair/trio. I also converted all `vTagID` columns back to 
-numeric for compatibility with the `allSites` data frame.
+Based on `PIT_Tag`s, some individuals were represented by multiple `vTagID` values.
+
+> I will refer to `vTagID`s representing the same individual as "equivalent `vTagID`s".
+
+To simplify matters, I'll make a lookup data frame, and in the final output data frame, I'll 
+replace any `vTagID`s that are part of an equivalent pair/trio with the most recent
+`vTagID` representing that individual.
+
+### Newest `vTagID` lookup
+
+The below function will return the most recent `vTagID` from an input vector of `vTagID`s.
+*Note*: This function does not retrieve the newest `vTagID` for a given *individual*,
+just from the provided `vTagID`s. The final `vTagID` lookup data frame will achieve 
+the former.
+
+``` {r newest_vTagID_fun}
+findNewest_vTagID <- function(focal_vTagIDs, refDF = allSites){
+    new_vTagID <- (refDF %>%
+        filter(vTagID %in% as.numeric(focal_vTagIDs[!is.na(focal_vTagIDs)])) %>%
+        arrange(desc(Date)))$vTagID[1]
+    return(new_vTagID)
+}
+```
+
+
+### Lookup data frame
+
+This lookup data frame can be used to find the newest equivalent `vTagID` for a given
+input `vTagID`. I first created a data frame of these equivalent `vTagID`s, one row 
+per equivalent pair/trio, including the `PIT_Tag` that allowed me to match them.
 ```{r equiv_vTagIDs_tmp}
 equiv_vTagID_PIT <- 
     vTagID_PIT %>%
     group_by(PIT_Tag) %>%
+    # Combining all equivalent vTagIDs into one character column, separated by ':',
+    # then split them up
     summarize(vTagIDs = paste(vTagID, collapse = ':')) %>%
     separate(vTagIDs, paste0('vTagID_', seq(3)), sep = ':', 
              fill = 'right') %>%
+    # Remove rows where only one vTagID matches with the PIT_Tag
     filter(!is.na(vTagID_2)) %>%
-    mutate_each(funs(as.numeric), starts_with('vtagid')) %>%
+    # Convert vTagID columns back to numeric for compatibility with `allSites` data frame
+    mutate_each(funs(as.numeric), starts_with('vTagID')) %>%
     select(vTagID_1, vTagID_2, vTagID_3, PIT_Tag)
 ```
 
-For easier lookup of `vTagID`s, I expanded the table so that every `vTagID` that was part
-of an equivalent pair/trio was present in the first column, `"prim"`. Columns `"second"` 
-and `"tert"` contain the other(s) in the pair/trio.
+For easier lookup of whether a given `vTagID` is part of an equivalent pair/trio, and, if
+so, what the newest `vTagID` is for that individual, the final lookup data frame is a
+"longer" version of the one above.
+In this data frame, every `vTagID` that is part of an equivalent pair/trio 
+is present in the first column, `"input"`. The newest `vTagID` for that individual 
+is in the `"newest"` column.
+
+The code block below does the following:
+1. Create a list to coerce to a data frame, with the following named entries:
+    a. `"input"`: The first 3 columns of `equiv_vTagID_PIT` turned into a single vector.
+    b. `"newest"`: `apply` the `findNewest_vTagID` function across rows of the
+       `equiv_vTagID_PIT` data frame, but only including the first 3 columns (the 
+       ones with `vTagID`s). This returns a vector of the newest `vTagID`s per pair/trio.
+       I also used `repeat` on `newest_vTagIDs` with the option `each = 3`, to make 
+       this vector the same length as that in the `"input"` entry and to make 
+       them refer to the same individual at all locations across both vectors.
+2. Combine these vectors into a single data frame (`equiv_vTagID`), and remove any rows
+   where `input` is not present.
 
 ```{r equiv_vTagID}
-equiv_vTagID <- list(
-    equiv_vTagID_PIT %>% select(1, 2, 3) %>% 
-        select(prim = 1, second = 2, tert = 3),
-    equiv_vTagID_PIT %>% select(2, 1, 3) %>% 
-        select(prim = 1, second = 2, tert = 3),
-    equiv_vTagID_PIT %>% select(3, 1, 2) %>% 
-        select(prim = 1, second = 2, tert = 3) %>% na.omit
-    ) %>%
-    bind_rows()
+equiv_vTagID <- list(input = as.vector(t(equiv_vTagID_PIT[,1:3])),
+                     newest = rep(apply(equiv_vTagID_PIT[,1:3], 1, findNewest_vTagID),
+                                  each = 3)) %>% 
+    data.frame %>%
+    filter(!is.na(input)) %>%
+    as.tbl
 ```
+
+
+
 
 
 
 ## Retrieving full information for captures with duplicate `vTagID`s
 
-To check on these seemingly equivalent `vTagID`s, below is how to create a csv file
+To check on equivalent `vTagID`s, below is how to create a csv file
 of each capture containing an equivalent `vTagID`.
 
 ```{r equivRows, eval = FALSE}
 equivRows <-
     allSites %>%
-    filter(vTagID %in% equiv_vTagID$prim, 
+    filter(vTagID %in% equiv_vTagID$input, 
            PIT_Tag %in% equiv_vTagID_PIT$PIT_Tag) %>% 
     arrange(Site, PIT_Tag, vTagID)
 
@@ -321,13 +270,11 @@ write_csv(equivRows, 'equivalent_vTagIDs.csv')
 
 ## Expanding lookup data frame
 
-If we assume that all equivalent `vTagID`s are actually the same individual, we should
-expand the lookup data frame to account for this.
-
-*Note:* This is not yet implemented because I am not yet sure if we can make the above
-assumption.
+I will now expand the lookup data frame to account for the fact that some `vTagID`s 
+represent the same individual.
 
 ```{r expandLookup}
+
 
 ```
 
@@ -351,7 +298,7 @@ valid_PIT <- allSites %>%
     mutate(vTagID = PIT_to_vTagID(PIT_Tag)) %>%
     ungroup
 
-allSites_known <- list(valid_vTagID, valid_PIT) %>%
+allKnownSites <- list(valid_vTagID, valid_PIT) %>%
     bind_rows
 
 rm(valid_vTagID, valid_PIT)
