@@ -110,7 +110,7 @@ the former.
 This lookup data frame can be used to find the newest equivalent `vTagID` for a given
 input `vTagID`. I first created a data frame of these equivalent `vTagID`s, one row 
 per equivalent pair/trio, including the `PIT_Tag` that allowed me to match them.
-```{r equiv_vTagIDs_tmp}
+```{r equiv_vTagID_PIT}
 ```
 
 For easier lookup of whether a given `vTagID` is part of an equivalent pair/trio, and, if

@@ -9,7 +9,7 @@ library("stringr")
 
 
 ## @knitr sourceCompiling
-source('compiling.R')
+source("compiling.R")
 
 
 
@@ -33,11 +33,12 @@ allSites %>%
 
 
 
+
 ## @knitr vTag_PIT_lookup_DF
 vTagID_PIT <- allSites %>%
-filter(!is.na(vTagID), !is.na(PIT_Tag)) %>%
-distinct(vTagID, PIT_Tag) %>%
-select(vTagID, PIT_Tag)
+    filter(!is.na(vTagID), !is.na(PIT_Tag)) %>%
+    distinct(vTagID, PIT_Tag) %>%
+    select(vTagID, PIT_Tag)
 
 
 
@@ -68,7 +69,7 @@ findNewest_vTagID <- function(focal_vTagIDs, refDF = allSites){
 
 
 
-## @knitr equiv_vTagIDs_tmp
+## @knitr equiv_vTagID_PIT
 equiv_vTagID_PIT <- 
     vTagID_PIT %>%
     group_by(PIT_Tag) %>%
@@ -114,14 +115,14 @@ equiv_vTagID <- list(input = as.vector(t(equiv_vTagID_PIT[,1:3])),
 valid_vTagID <- allSites %>% filter(!is.na(vTagID))
 
 valid_PIT <- allSites %>%
-filter(is.na(vTagID),
-PIT_Tag %in% vTagID_PIT$PIT_Tag) %>%
-rowwise %>%
-mutate(vTagID = PIT_to_vTagID(PIT_Tag)) %>%
-ungroup
+    filter(is.na(vTagID),
+           PIT_Tag %in% vTagID_PIT$PIT_Tag) %>%
+    rowwise %>%
+    mutate(vTagID = PIT_to_vTagID(PIT_Tag)) %>%
+    ungroup
 
 allKnownSites <- list(valid_vTagID, valid_PIT) %>%
-bind_rows
+    bind_rows
 
 rm(valid_vTagID, valid_PIT)
 
