@@ -1,5 +1,5 @@
 ---
-title: "Identifiers: Assembling master list"
+title: "Identifiers: Assembling master list and dropped `vTagID`s"
 author: "Lucas A. Nell"
 date: "May 22, 2016"
 output:
@@ -47,17 +47,26 @@ with all the `PIT_Tag`(s) associated with them, and vice versa.
 
 I first want to figure out how many unique, non-`NA` `PIT_Tag`s are associated with 
 `vTagID`s, and vice versa. 
-The max appears to be 3 for both.
 
 ### `PIT_Tag`s per `vTagID`
-Table of the number of unique, non-NA `PIT_Tag`s per `vTagID`
+Table of the number of unique, non-`NA` `PIT_Tag`s per `vTagID`
 ```{r unique_PITs_per_vTag}
 ```
 
 ### `vTagID`s per `PIT_Tag`
-Table of the number of unique, non-NA `vTagID`s per `PIT_Tag`
+Table of the number of unique, non-`NA` `vTagID`s per `PIT_Tag`
 ```{r unique_vTags_per_PIT}
 ```
+
+
+## Maximum matches
+
+The max appears to be 3 for both tables above, so I'll create an object to store this 
+value for later.
+```{r maxUniques}
+```
+
+
 
 
 ## `PIT_Tag`--`vTagID` pairs
@@ -66,7 +75,7 @@ I needed to create a data frame of all unique `vTagID`--`PIT_Tag` pairs, so that
 data frame doesn't have to be created for every single lookup (which would be a real
 time-waster).
 Because some `PIT_Tag`s match with multiple `vTagID`s, I will expand this data frame
-below to account for this.
+later to account for this.
 
 ```{r vTag_PIT_lookup_DF}
 ```
@@ -84,28 +93,32 @@ though I am creating these functions now, they will use the updated version of
 ```
 
 
-## Equivalent `vTagID`s
 
-Based on `PIT_Tag`s, some individuals were represented by multiple `vTagID` values.
+
+
+# Equivalent `vTagID`s
+
+Based on `PIT_Tag`s, some individuals were represented by multiple `vTagID` values. These
+were individuals where the tag fell off/out and were replaced with a new one.
 
 > I will refer to `vTagID`s representing the same individual as "equivalent `vTagID`s".
 
-To simplify matters, I'll make a lookup data frame, and in the final output data frame, I'll 
-replace any `vTagID`s that are part of an equivalent pair/trio with the most recent
+To simplify matters, I'll make a lookup data frame, and in the final output data frame,
+I'll replace any `vTagID`s that are part of an equivalent pair/trio with the most recent
 `vTagID` representing that individual.
 
-### Newest `vTagID` lookup
+
+## Newest `vTagID` lookup
 
 The below function will return the most recent `vTagID` from an input vector of `vTagID`s.
 *Note*: This function does not retrieve the newest `vTagID` for a given *individual*,
-just from the provided `vTagID`s. The final `vTagID` lookup data frame will achieve 
-the former.
+just from the provided `vTagID`s.
 
 ``` {r newest_vTagID_fun}
 ```
 
 
-### Lookup data frame
+## Equivalent `vTagID` lookup data frame
 
 This lookup data frame can be used to find the newest equivalent `vTagID` for a given
 input `vTagID`. I first created a data frame of these equivalent `vTagID`s, one row 
@@ -138,8 +151,7 @@ The code chunk below does the following:
 
 
 
-
-## Retrieving full information for captures with duplicate `vTagID`s
+## Retrieving full information for captures including equivalent `vTagID`s
 
 To check on equivalent `vTagID`s, below is how to create a csv file
 of each capture containing an equivalent `vTagID`.
@@ -158,8 +170,8 @@ write_csv(equivRows, 'equivalent_vTagIDs.csv')
 
 ## Expanding lookup data frame
 
-I will now expand the lookup data frame to account for the fact that some `vTagID`s 
-represent the same individual.
+I will now expand the lookup data frame to account for the fact that some individuals
+are represented by multiple `vTagID`s.
 
 ```{r expandLookup}
 ```

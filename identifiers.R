@@ -32,6 +32,9 @@ allSites %>%
     table
 
 
+## @knitr maxUniques
+
+maxUniques <- 3
 
 
 ## @knitr vTag_PIT_lookup_DF
@@ -62,7 +65,8 @@ PIT_to_vTagID <- function(in_PIT){
 ## @knitr newest_vTagID_fun
 findNewest_vTagID <- function(focal_vTagIDs, refDF = allSites){
     new_vTagID <- (refDF %>%
-                       filter(vTagID %in% as.numeric(focal_vTagIDs[!is.na(focal_vTagIDs)])) %>%
+                       filter(vTagID %in% 
+                                  as.numeric(focal_vTagIDs[!is.na(focal_vTagIDs)])) %>%
                        arrange(desc(Date)))$vTagID[1]
     return(new_vTagID)
 }
@@ -73,25 +77,24 @@ findNewest_vTagID <- function(focal_vTagIDs, refDF = allSites){
 equiv_vTagID_PIT <- 
     vTagID_PIT %>%
     group_by(PIT_Tag) %>%
-    # Combining all equivalent vTagIDs into one character column, separated by ':',
-    # then split them up
+    # Combining all equivalent vTagIDs into one character column, separated by ':'
     summarize(vTagIDs = paste(vTagID, collapse = ':')) %>%
-    separate(vTagIDs, paste0('vTagID_', seq(3)), sep = ':', 
+    # ... then split them back up
+    separate(vTagIDs, paste0('vTagID_', seq(maxUniques)), sep = ':', 
              fill = 'right') %>%
     # Remove rows where only one vTagID matches with the PIT_Tag
     filter(!is.na(vTagID_2)) %>%
     # Convert vTagID columns back to numeric for compatibility with `allSites` data frame
     mutate_each(funs(as.numeric), starts_with('vTagID')) %>%
-    select(vTagID_1, vTagID_2, vTagID_3, PIT_Tag)
-
-
-
+    # Using 'standard evaluation' by using `select_`, which allows use of `maxUniques`
+    select_(.dots = c(paste0('vTagID_', seq(maxUniques)), 'PIT_Tag'))
 
 
 ## @knitr equiv_vTagID
-equiv_vTagID <- list(input = as.vector(t(equiv_vTagID_PIT[,1:3])),
-                     newest = rep(apply(equiv_vTagID_PIT[,1:3], 1, findNewest_vTagID),
-                                  each = 3)) %>% 
+equiv_vTagID <- list(input = as.vector(t(equiv_vTagID_PIT[,1:maxUniques])),
+                     newest = rep(apply(equiv_vTagID_PIT[,1:maxUniques], 1, 
+                                        findNewest_vTagID),
+                                  each = maxUniques)) %>% 
     data.frame %>%
     filter(!is.na(input)) %>%
     as.tbl
