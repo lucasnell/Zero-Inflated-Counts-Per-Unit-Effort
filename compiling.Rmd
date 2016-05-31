@@ -6,7 +6,7 @@ output:
   html_document:
     highlight: haddock
     number_sections: yes
-    theme: journal
+    theme: default
     toc: yes
     toc_depth: 2
   pdf_document:

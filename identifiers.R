@@ -6,6 +6,7 @@
 library("dplyr")
 library("tidyr")
 library("stringr")
+library("readr")
 
 
 ## @knitr sourceCompiling
@@ -14,27 +15,30 @@ source("compiling.R")
 
 
 ## @knitr unique_PITs_per_vTag
-# Table of # of unique, non-NA PIT_Tags per vTagID
-allSites %>% 
+unique_PITs_Tab <- allSites %>% 
     filter(!is.na(vTagID), !is.na(PIT_Tag)) %>%
     group_by(vTagID) %>%
     summarize(uniquePITs = length(unique(PIT_Tag))) %>%
     select(uniquePITs) %>% 
     table
+unique_PITs_Tab
 
 ## @knitr unique_vTags_per_PIT
-# Table of # of unique, non-NA vTagIDs per PIT_Tag
-allSites %>%
+unique_vTags_Tab <- allSites %>%
     filter(!is.na(vTagID), !is.na(PIT_Tag)) %>%
     group_by(PIT_Tag) %>%
     summarize(uniquevTagIDs = length(unique(vTagID))) %>%
     select(uniquevTagIDs) %>% 
     table
+unique_vTags_Tab
+
 
 
 ## @knitr maxUniques
 
-maxUniques <- 3
+maxUniques <- c(as.numeric(attr(unique_PITs_Tab, 'dimnames')$.), 
+                as.numeric(attr(unique_vTags_Tab, 'dimnames')$.)) %>% max
+
 
 
 ## @knitr vTag_PIT_lookup_DF
@@ -102,16 +106,75 @@ equiv_vTagID <- list(input = as.vector(t(equiv_vTagID_PIT[,1:maxUniques])),
 
 
 
+## @knitr expand_vTagID_PIT_NewRows
+
+vTagID_PIT_NewRows <- equiv_vTagID %>%
+    # Group by individual
+    group_by(newest) %>%
+    # Create character strings of all PIT_Tags and vTagIDs for each individual, 
+    #   separated by colons
+    summarize(PIT_Tags = paste0(vTagID_PIT$PIT_Tag[vTagID_PIT$vTagID %in% input],
+                               collapse = ':'),
+              vTagIDs = paste0(input, collapse = ':')) %>%
+    # Separate PIT_Tags into separate columns (used 20 bc it's definitely more than what
+    #   we'll observe)
+    separate(PIT_Tags, paste0('PIT_Tags_', seq(20)), sep = ':', 
+             fill = 'right') %>%
+    # Condense into a single column by adding rows, or "lengthening" data frame
+    gather(PIT_name, PIT_Tag, -newest, -vTagIDs, na.rm = TRUE) %>%
+    # These columns no longer needed
+    select(-PIT_name, -newest) %>%
+    # Do the same as above for the vTagIDs
+    separate(vTagIDs, paste0('vTagIDs_', seq(10)), sep = ':', 
+             fill = 'right') %>%
+    gather(vTagID_name, vTagID, -PIT_Tag, na.rm = TRUE) %>%
+    # Make vTagID numeric for compatibility
+    mutate(vTagID = as.numeric(vTagID)) %>%
+    select(-vTagID_name) %>%
+    # Filter for unique combinations
+    distinct(vTagID, PIT_Tag)
 
 
 
-## @knitr expandLookup
+
+## @knitr expand_vTagID_PIT
+
+vTagID_PIT <- bind_rows(vTagID_PIT, vTagID_PIT_NewRows) %>%
+    distinct(vTagID, PIT_Tag) %>%
+    arrange(vTagID)
+
+
+## @knitr max_vTagIDs
+
+max_vTagIDs <- vTagID_PIT %>% 
+    group_by(vTagID) %>% 
+    summarize(len = n()) %>% 
+    select(len) %>% 
+    max
+
+
+## @knitr PITs_w_vTag
+PITs_w_vTag <- vTagID_PIT %>%
+    group_by(PIT_Tag) %>% 
+    summarize(vTagID_new = findNewest_vTagID(vTagID)) %>%
+    rename(vTagID = vTagID_new) %>%
+    mutate(
+        River = sapply(PIT_Tag, function(x){
+            tail(allSites$Site[allSites$PIT_Tag == x] %>% na.omit, 1)}, 
+            USE.NAMES = FALSE)
+    ) %>%
+    arrange(River, PIT_Tag) %>%
+    select(River, PIT_Tag, vTagID)
 
 
 
 
 
+## @knitr dropped_vTagIDs
 
+dropped_vTagIDs <- equiv_vTagID %>% 
+    filter(! input %in% equiv_vTagID$newest) %>%
+    rename(dropped = input, new = newest)
 
 
 ## @knitr allSites_known
@@ -124,8 +187,7 @@ valid_PIT <- allSites %>%
     mutate(vTagID = PIT_to_vTagID(PIT_Tag)) %>%
     ungroup
 
-allKnownSites <- list(valid_vTagID, valid_PIT) %>%
-    bind_rows
+masterObs <- bind_rows(valid_vTagID, valid_PIT)
 
 rm(valid_vTagID, valid_PIT)
 
