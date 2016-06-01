@@ -170,8 +170,8 @@ PITs_w_vTag <- vTagID_PIT %>%
 
 
 
-## @knitr dropped_vTagIDs
 
+## @knitr dropped_vTagIDs
 dropped_vTagIDs <- equiv_vTagID %>% 
     filter(! input %in% equiv_vTagID$newest) %>%
     rename(dropped = input, new = newest)

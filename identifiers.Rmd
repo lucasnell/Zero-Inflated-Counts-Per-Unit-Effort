@@ -198,10 +198,10 @@ I first assigned an object for the maximum number of `vTagID`s for any given `PI
 ```{r max_vTagIDs}
 ```
 
-<!-- Now I'll make the data "wider" for easier lookup in Excel or similar types of tables. -->
-<!-- I'm doing this the same way I did it for the first three steps above for the -->
-<!-- `equiv_vTagID_PIT` data frame. In this case, however, I'm  -->
-
+I next made the data frame of `PIT_Tag`s and `vTagID`s into a data frame of all `PIT_Tag`s
+with a `vTagID`. If more than one `vTagID` is associated with a given `PIT_Tag`, I used 
+the newest `vTagID`. I lastly added a `"River"` column by referencing the `allSites`
+data frame.
 
 ```{r PITs_w_vTag}
 ```

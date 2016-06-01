@@ -59,7 +59,8 @@ Suwa <- Suwa %>%
         Date = as.Date(Date),
         Site = gsub('_', ' ', Site) %>% str_to_title
     ) %>%
-    select(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
+    select(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm) %>%
+    filter(!is.na(Site))
 
 
 ## @knitr manPearl
@@ -119,6 +120,8 @@ gatherByPIT <- function(df){
         filter(PIT_name == 'PIT_Tag1' | !is.na(PIT_Tag)) %>%
         select(-PIT_name)
 }
+
+
 
 
 

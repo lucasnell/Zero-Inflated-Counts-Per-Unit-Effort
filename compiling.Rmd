@@ -55,6 +55,7 @@ beginning.
 ```
 
 ## Suwannee
+*Note:* This one also had some rows full of `NA`s, hence the `filter` command at the end.
 ``` {r manSuwa}
 ```
 
