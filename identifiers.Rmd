@@ -134,7 +134,7 @@ is in the `"newest"` column.
 
 The code chunk below does the following:
 
-1. Create a list to coerce to a data frame, with the following named entries:
+1. Create a data frame, with the following named columns:
     a. `"input"`: The first 3 columns of `equiv_vTagID_PIT` turned into a single vector.
     b. `"newest"`: `apply` the `findNewest_vTagID` function across rows of the
        `equiv_vTagID_PIT` data frame, but only including the first 3 columns (the 
@@ -147,6 +147,7 @@ The code chunk below does the following:
 
 ```{r equiv_vTagID}
 ```
+
 
 
 
@@ -225,7 +226,7 @@ the `"newest"` column. I then renamed the columns for clarity in this context.
 
 And to save it:
 
-```{r saveWide_vTagID_PIT, eval = FALSE}
+```{r save_dropped_vTagIDs, eval = FALSE}
 write_csv(dropped_vTagIDs, 'dropped_vTagIDs.csv')
 ```
 
@@ -233,18 +234,36 @@ write_csv(dropped_vTagIDs, 'dropped_vTagIDs.csv')
 
 # Master data frame of observations
 
+## Making master data frame only use newest `vTagID`s
+
+I now replace all instances in the master observation data frame of dropped `vTagID`s 
+with the newest `vTagID` that represents the same individual.
+
+```{r newestID_master}
+```
+
+
+## Making master data frame contain only valid `vTagID`s
+
 By cross-referencing with the data frame of known `vTagID`s for `PIT_Tag`s, I filled
 in some rows that don't have `vTagID`s, but do have `PIT_Tag`s. I combined these rows 
 with those from `allSites` that already have valid (i.e., non-`NA`) `vTagID`s to create
 a data frame of all observations with known identifiers.
 
-```{r allSites_known}
+In creating the `valid_PIT` data frame, I'm wrapping the `PIT_to_vTagID` function inside
+the `Vectorize` function so that the new "vectorized" function uses and returns a
+vector. I could have also used `sapply` as I did above, but `Vectorize` was simpler in 
+this case, since I'd already created the base function.
+For more information on vectorization, see
+[here](http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html).
+
+```{r knownID_master}
 ```
 
 
 Now I can save this as a csv file.
 
-```{r saveWide_vTagID_PIT, eval = FALSE}
+```{r save_masterObs, eval = FALSE}
 write_csv(masterObs, 'masterObs.csv')
 ```
 

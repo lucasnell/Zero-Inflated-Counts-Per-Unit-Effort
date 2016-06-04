@@ -95,11 +95,10 @@ equiv_vTagID_PIT <-
 
 
 ## @knitr equiv_vTagID
-equiv_vTagID <- list(input = as.vector(t(equiv_vTagID_PIT[,1:maxUniques])),
-                     newest = rep(apply(equiv_vTagID_PIT[,1:maxUniques], 1, 
-                                        findNewest_vTagID),
-                                  each = maxUniques)) %>% 
-    data.frame %>%
+equiv_vTagID <- data.frame(input = as.vector(t(equiv_vTagID_PIT[,1:maxUniques])),
+                           newest = rep(apply(equiv_vTagID_PIT[,1:maxUniques], 1, 
+                                              findNewest_vTagID),
+                                        each = maxUniques)) %>% 
     filter(!is.na(input)) %>%
     as.tbl
 
@@ -177,15 +176,28 @@ dropped_vTagIDs <- equiv_vTagID %>%
     rename(dropped = input, new = newest)
 
 
-## @knitr allSites_known
-valid_vTagID <- allSites %>% filter(!is.na(vTagID))
 
-valid_PIT <- allSites %>%
+
+
+## @knitr newestID_master
+allSites_newIDs <- allSites %>%
+    mutate(
+        vTagID = sapply(vTagID, 
+                        function(x){
+                            ifelse(x %in% dropped_vTagIDs$dropped, 
+                                   dropped_vTagIDs$new[dropped_vTagIDs$dropped == x], 
+                                   x)
+                        })
+    )
+
+
+## @knitr knownID_master
+valid_vTagID <- allSites_newIDs %>% filter(!is.na(vTagID))
+
+valid_PIT <- allSites_newIDs %>%
     filter(is.na(vTagID),
            PIT_Tag %in% vTagID_PIT$PIT_Tag) %>%
-    rowwise %>%
-    mutate(vTagID = PIT_to_vTagID(PIT_Tag)) %>%
-    ungroup
+    mutate(vTagID = Vectorize(PIT_to_vTagID, 'in_PIT', USE.NAMES = FALSE)(PIT_Tag))
 
 masterObs <- bind_rows(valid_vTagID, valid_PIT)
 
