@@ -10,7 +10,7 @@ library("readr")
 
 
 ## @knitr sourceCompiling
-source("compiling.R")
+source("../R_files/compiling.R")
 
 
 
@@ -199,7 +199,7 @@ valid_PIT <- allSites_newIDs %>%
            PIT_Tag %in% vTagID_PIT$PIT_Tag) %>%
     mutate(vTagID = Vectorize(PIT_to_vTagID, 'in_PIT', USE.NAMES = FALSE)(PIT_Tag))
 
-masterObs <- bind_rows(valid_vTagID, valid_PIT)
+masterCaps <- bind_rows(valid_vTagID, valid_PIT)
 
 rm(valid_vTagID, valid_PIT)
 

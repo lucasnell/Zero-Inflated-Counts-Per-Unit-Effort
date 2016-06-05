@@ -20,7 +20,7 @@ runtime: shiny
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = '', prompt = FALSE)
-knitr::read_chunk('bootstrapping.R')
+knitr::read_chunk('../R_files/bootstrapping.R')
 ```
 
 
@@ -113,3 +113,7 @@ endeavor.
 
 
 
+
+<!---
+rmarkdown::render('bootstrapping.Rmd', output_file = '../bootstrapping.html')
+-->

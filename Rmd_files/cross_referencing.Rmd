@@ -1,0 +1,115 @@
+---
+title: "Cross referencing"
+author: "Lucas A. Nell"
+date: "June 5, 2016"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: default
+    toc: yes
+    toc_depth: 2
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+mainfont: Helvetica
+geometry: margin=1in
+fontsize: 10pt
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = '', prompt = FALSE)
+knitr::read_chunk('../R_files/cross_referencing.R')
+```
+
+
+# Setup
+
+## Required packages
+```{r libraries, message = FALSE}
+```
+
+## Required objects
+
+We need the objects created in the `identifiers` stage.
+
+```{r read_ID_objects}
+```
+
+
+## Lookup functions {.tabset}
+
+### Retrieve newest `vTagID` from a vector of `vTagID`s
+
+```{r newest_vTagID}
+```
+
+### Retrieve `vTagID` from `PIT_Tag`
+
+Below isn't really necessary because the only data frame with a `PIT_Tag` column doesn't 
+have any rows with non-`NA` `PIT_Tag` but `NA` `vTagID`. 
+I'm leaving it here for reference only.
+```{r vTagID_from_PIT}
+```
+
+
+# Reading, processing data for comparison to master
+
+
+## `Eglin_List`...
+
+```{r read_Eglin}
+```
+
+
+## `All_GS_transmitters`...
+
+```{r read_allGS}
+```
+
+## `filtered_detections`
+
+This differs from previous tables in that it's when individuals were detected by the
+receiver array, not when they were captured.
+```{r read_filtered_detections}
+```
+
+
+
+
+# Comparing `Eglin` to master
+
+
+
+# Comparing `allGS` to master
+
+
+
+# Comparing `filtDet` to master
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Session information
+
+```{r session_info, include = TRUE, echo = TRUE, results = 'markup'}
+devtools::session_info()
+```
+
+
+
+
+
+<!---
+rmarkdown::render('cross_referencing.Rmd', output_file = '../cross_referencing.html')
+-->
