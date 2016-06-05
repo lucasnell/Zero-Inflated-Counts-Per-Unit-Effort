@@ -13,7 +13,7 @@ used chunks of code from separate R files in R markdown files), see
 http://zevross.com/blog/2014/07/09/making-use-of-external-r-code-in-knitr-and-r-markdown/
 ).
 
-*Note*: To see rendered versions of html files, prepend "https://htmlpreview.github.io/?"
+*Note*: To see rendered versions of html files, prepend `"https://htmlpreview.github.io/?"`
 to its original URL. The `compiling` html file would thus be:
 ```
 https://htmlpreview.github.io/?https://github.com/lucasnell/ziCPUE/blob/master/compiling.html
