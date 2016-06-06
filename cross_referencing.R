@@ -9,12 +9,10 @@ library("stringr")
 library("readr")
 library('readxl')
 
-
-
 ## @knitr read_ID_objects
-masterCaps <- read_csv('../csv_out/masterCaps.csv', col_types = 'cDiiddc')
-dropped_vTagIDs <- read_csv('../csv_out/dropped_vTagIDs.csv')
-PITs_w_vTag <- read_csv('../csv_out/PITs_w_vTag.csv')
+masterCaps <- read_csv('./csv_out/masterCaps.csv', col_types = 'cDiiddc')
+dropped_vTagIDs <- read_csv('./csv_out/dropped_vTagIDs.csv')
+PITs_w_vTag <- read_csv('./csv_out/PITs_w_vTag.csv')
 
 
 
@@ -205,8 +203,13 @@ filtDet_inMaster <- filtDet %>%
     select(inMaster, Rivers, vTagID)
 
 
-# write_csv(filtDet_inMaster, '../csv_out/filtDet_inMaster.csv')
+masterCaps_inFD <- masterCaps %>% 
+    mutate(inFD = vTagID %in% unique(filtDet$vTagID))
 
 
+
+# write_csv(filtDet_inMaster, './csv_out/filtDet_inMaster.csv')
+
+# write_csv(masterCaps_inFD, './csv_out/masterCaps_inFD.csv')
 
 

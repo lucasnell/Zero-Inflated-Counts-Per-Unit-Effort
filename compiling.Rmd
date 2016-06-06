@@ -20,7 +20,7 @@ runtime: shiny
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = '', prompt = FALSE)
-knitr::read_chunk('../R_files/compiling.R')
+knitr::read_chunk('compiling.R')
 ```
 
 # Setup
@@ -99,5 +99,5 @@ filtered rows that didn't have either a `PIT_Tag` or `vTagID`.
 
 
 <!---
-rmarkdown::render('compiling.Rmd', output_file = '../compiling.html')
+rmarkdown::render('compiling.Rmd', output_file = 'compiling.html')
 -->

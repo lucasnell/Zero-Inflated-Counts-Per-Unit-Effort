@@ -15,11 +15,12 @@ output:
 mainfont: Helvetica
 geometry: margin=1in
 fontsize: 10pt
+runtime: shiny
 ---
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = '', prompt = FALSE)
-knitr::read_chunk('../R_files/cross_referencing.R')
+knitr::read_chunk('cross_referencing.R')
 ```
 
 
@@ -39,6 +40,9 @@ We need the objects created in the `identifiers` stage.
 
 ## Lookup functions {.tabset}
 
+Below tabs have lookup functions for individual character inputs, and "vectorized" 
+versions for vector input/output.
+
 ### Retrieve newest `vTagID` from a vector of `vTagID`s
 
 ```{r newest_vTagID}
@@ -47,7 +51,7 @@ We need the objects created in the `identifiers` stage.
 ### Retrieve `vTagID` from `PIT_Tag`
 
 Below isn't really necessary because the only data frame with a `PIT_Tag` column doesn't 
-have any rows with non-`NA` `PIT_Tag` but `NA` `vTagID`. 
+have any rows with a `PIT_Tag` but no `vTagID`. 
 I'm leaving it here for reference only.
 ```{r vTagID_from_PIT}
 ```
@@ -102,6 +106,7 @@ receiver array, not when they were captured.
 
 # Session information
 
+
 ```{r session_info, include = TRUE, echo = TRUE, results = 'markup'}
 devtools::session_info()
 ```
@@ -111,5 +116,5 @@ devtools::session_info()
 
 
 <!---
-rmarkdown::render('cross_referencing.Rmd', output_file = '../cross_referencing.html')
+rmarkdown::render('cross_referencing.Rmd', output_file = 'cross_referencing.html')
 -->
