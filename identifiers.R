@@ -10,7 +10,7 @@ library("readr")
 
 
 ## @knitr sourceCompiling
-source("./R_files/compiling.R")
+source("compiling.R")
 
 
 

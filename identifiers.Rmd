@@ -15,12 +15,11 @@ output:
 mainfont: Helvetica
 geometry: margin=1in
 fontsize: 10pt
-runtime: shiny
 ---
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, comment = '', prompt = FALSE)
-knitr::read_chunk('../R_files/identifiers.R')
+knitr::read_chunk('identifiers.R')
 ```
 
 # Setup
@@ -210,7 +209,7 @@ data frame.
 Now I can save this as a csv file.
 
 ```{r save_PITs_w_vTag, eval = FALSE}
-write_csv(PITs_w_vTag, '../csv_out/PITs_w_vTag.csv')
+write_csv(PITs_w_vTag, './csv_out/PITs_w_vTag.csv')
 ```
 
 
@@ -227,7 +226,7 @@ the `"newest"` column. I then renamed the columns for clarity in this context.
 And to save it:
 
 ```{r save_dropped_vTagIDs, eval = FALSE}
-write_csv(dropped_vTagIDs, '../csv_out/dropped_vTagIDs.csv')
+write_csv(dropped_vTagIDs, './csv_out/dropped_vTagIDs.csv')
 ```
 
 
@@ -264,12 +263,12 @@ For more information on vectorization, see
 Now I can save this as a csv file.
 
 ```{r save_masterCaps, eval = FALSE}
-write_csv(masterCaps, '../csv_out/masterCaps.csv')
+write_csv(masterCaps, './csv_out/masterCaps.csv')
 ```
 
 
 
 
 <!---
-rmarkdown::render('identifiers.Rmd', output_file = '../identifiers.html')
+rmarkdown::render('identifiers.Rmd', output_file = 'identifiers.html')
 -->

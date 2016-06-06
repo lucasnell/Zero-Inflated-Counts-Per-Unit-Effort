@@ -15,7 +15,6 @@ output:
 mainfont: Helvetica
 geometry: margin=1in
 fontsize: 10pt
-runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
