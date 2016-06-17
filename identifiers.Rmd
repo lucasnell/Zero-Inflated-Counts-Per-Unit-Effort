@@ -231,7 +231,7 @@ write_csv(dropped_vTagIDs, './csv_out/dropped_vTagIDs.csv')
 
 
 
-# Master data frame of observations
+# Master data frame of captures
 
 ## Making master data frame only use newest `vTagID`s
 
@@ -266,6 +266,16 @@ Now I can save this as a csv file.
 write_csv(masterCaps, './csv_out/masterCaps.csv')
 ```
 
+
+
+
+
+# Session information
+
+
+```{r session_info, include = TRUE, echo = TRUE, results = 'markup'}
+devtools::session_info()
+```
 
 
 

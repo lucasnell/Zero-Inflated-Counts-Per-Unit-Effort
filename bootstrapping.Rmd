@@ -113,6 +113,16 @@ endeavor.
 
 
 
+
+# Session information
+
+
+```{r session_info, include = TRUE, echo = TRUE, results = 'markup'}
+devtools::session_info()
+```
+
+
+
 <!---
 rmarkdown::render('bootstrapping.Rmd', output_file = 'bootstrapping.html')
 -->

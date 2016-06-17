@@ -165,10 +165,11 @@ $(document).ready(function () {
 </ul></li>
 <li><a href="#final-data-frame-of-all-pit_tags-with-a-vtag"><span class="toc-section-number">4</span> Final data frame of all <code>PIT_Tag</code>s with a <code>vTag</code></a></li>
 <li><a href="#final-data-frame-of-dropped-vtagids"><span class="toc-section-number">5</span> Final data frame of dropped <code>vTagID</code>s</a></li>
-<li><a href="#master-data-frame-of-observations"><span class="toc-section-number">6</span> Master data frame of observations</a><ul>
+<li><a href="#master-data-frame-of-captures"><span class="toc-section-number">6</span> Master data frame of captures</a><ul>
 <li><a href="#making-master-data-frame-only-use-newest-vtagids"><span class="toc-section-number">6.1</span> Making master data frame only use newest <code>vTagID</code>s</a></li>
 <li><a href="#making-master-data-frame-contain-only-valid-vtagids"><span class="toc-section-number">6.2</span> Making master data frame contain only valid <code>vTagID</code>s</a></li>
 </ul></li>
+<li><a href="#session-information"><span class="toc-section-number">7</span> Session information</a></li>
 </ul>
 </div>
 
@@ -184,7 +185,7 @@ $(document).ready(function () {
 <div id="required-objects" class="section level2">
 <h2><span class="header-section-number">1.2</span> Required objects</h2>
 <p>We need the objects created in the compiling stage.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;./R_files/compiling.R&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;compiling.R&quot;</span>)</code></pre></div>
 </div>
 </div>
 <div id="matching-vtagids-and-pit_tags" class="section level1">
@@ -312,7 +313,7 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
            PIT_Tag %in%<span class="st"> </span>equiv_vTagID_PIT$PIT_Tag) %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">arrange</span>(Site, PIT_Tag, vTagID)
 
-<span class="kw">write_csv</span>(equivRows, <span class="st">'equivalent_vTagIDs.csv'</span>)</code></pre></div>
+<span class="kw">write_csv</span>(equivRows, <span class="st">'../csv_out/equivalent_vTagIDs.csv'</span>)</code></pre></div>
 </div>
 <div id="adjusting-vtagidpit_tag-lookup-data-frame-for-dropped-vtags" class="section level2">
 <h2><span class="header-section-number">3.4</span> Adjusting <code>vTagID</code>–<code>PIT_Tag</code> lookup data frame for dropped vTags</h2>
@@ -373,7 +374,7 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
 <span class="st">    </span><span class="kw">arrange</span>(River, PIT_Tag) %&gt;%
 <span class="st">    </span><span class="kw">select</span>(River, PIT_Tag, vTagID)</code></pre></div>
 <p>Now I can save this as a csv file.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write_csv</span>(PITs_w_vTag, <span class="st">'PITs_w_vTag.csv'</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write_csv</span>(PITs_w_vTag, <span class="st">'./csv_out/PITs_w_vTag.csv'</span>)</code></pre></div>
 </div>
 <div id="final-data-frame-of-dropped-vtagids" class="section level1">
 <h1><span class="header-section-number">5</span> Final data frame of dropped <code>vTagID</code>s</h1>
@@ -382,10 +383,10 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
 <span class="st">    </span><span class="kw">filter</span>(!<span class="st"> </span>input %in%<span class="st"> </span>equiv_vTagID$newest) %&gt;%
 <span class="st">    </span><span class="kw">rename</span>(<span class="dt">dropped =</span> input, <span class="dt">new =</span> newest)</code></pre></div>
 <p>And to save it:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write_csv</span>(dropped_vTagIDs, <span class="st">'dropped_vTagIDs.csv'</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write_csv</span>(dropped_vTagIDs, <span class="st">'./csv_out/dropped_vTagIDs.csv'</span>)</code></pre></div>
 </div>
-<div id="master-data-frame-of-observations" class="section level1">
-<h1><span class="header-section-number">6</span> Master data frame of observations</h1>
+<div id="master-data-frame-of-captures" class="section level1">
+<h1><span class="header-section-number">6</span> Master data frame of captures</h1>
 <div id="making-master-data-frame-only-use-newest-vtagids" class="section level2">
 <h2><span class="header-section-number">6.1</span> Making master data frame only use newest <code>vTagID</code>s</h2>
 <p>I now replace all instances in the master observation data frame of dropped <code>vTagID</code>s with the newest <code>vTagID</code> that represents the same individual.</p>
@@ -414,11 +415,49 @@ masterCaps &lt;-<span class="st"> </span><span class="kw">bind_rows</span>(valid
 
 <span class="kw">rm</span>(valid_vTagID, valid_PIT)</code></pre></div>
 <p>Now I can save this as a csv file.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write_csv</span>(masterCaps, <span class="st">'masterCaps.csv'</span>)</code></pre></div>
-<!---
-rmarkdown::render('identifiers.Rmd', output_file = './html/identifiers.html')
--->
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write_csv</span>(masterCaps, <span class="st">'./csv_out/masterCaps.csv'</span>)</code></pre></div>
 </div>
+</div>
+<div id="session-information" class="section level1">
+<h1><span class="header-section-number">7</span> Session information</h1>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">session_info</span>()</code></pre></div>
+<pre><code>Session info --------------------------------------------------------------</code></pre>
+<pre><code> setting  value                       
+ version  R version 3.3.0 (2016-05-03)
+ system   x86_64, darwin13.4.0        
+ ui       RStudio (0.99.902)          
+ language (EN)                        
+ collate  en_US.UTF-8                 
+ tz       America/New_York            
+ date     2016-06-17                  </code></pre>
+<pre><code>Packages ------------------------------------------------------------------</code></pre>
+<pre><code> package    * version date       source        
+ assertthat   0.1     2013-12-06 CRAN (R 3.3.0)
+ DBI          0.4-1   2016-05-08 CRAN (R 3.3.0)
+ devtools     1.11.1  2016-04-21 CRAN (R 3.3.0)
+ digest       0.6.9   2016-01-08 CRAN (R 3.3.0)
+ dplyr      * 0.4.3   2015-09-01 CRAN (R 3.3.0)
+ evaluate     0.9     2016-04-29 CRAN (R 3.3.0)
+ formatR      1.4     2016-05-09 CRAN (R 3.3.0)
+ htmltools    0.3.5   2016-03-21 CRAN (R 3.3.0)
+ knitr        1.13    2016-05-09 CRAN (R 3.3.0)
+ lazyeval     0.2.0   2016-06-12 CRAN (R 3.3.0)
+ magrittr     1.5     2014-11-22 CRAN (R 3.3.0)
+ memoise      1.0.0   2016-01-29 CRAN (R 3.3.0)
+ R6           2.1.2   2016-01-26 CRAN (R 3.3.0)
+ Rcpp         0.12.5  2016-05-14 CRAN (R 3.3.0)
+ readr      * 0.2.2   2015-10-22 CRAN (R 3.3.0)
+ readxl     * 0.1.1   2016-03-28 CRAN (R 3.3.0)
+ rmarkdown    0.9.6   2016-05-01 CRAN (R 3.3.0)
+ stringi      1.1.1   2016-05-27 CRAN (R 3.3.0)
+ stringr    * 1.0.0   2015-04-30 CRAN (R 3.3.0)
+ tibble       1.0     2016-03-23 CRAN (R 3.3.0)
+ tidyr      * 0.5.0   2016-06-12 CRAN (R 3.3.0)
+ withr        1.0.1   2016-02-04 CRAN (R 3.3.0)
+ yaml         2.1.13  2014-06-12 CRAN (R 3.3.0)</code></pre>
+<!---
+rmarkdown::render('identifiers.Rmd', output_file = 'identifiers.html')
+-->
 </div>
 
 

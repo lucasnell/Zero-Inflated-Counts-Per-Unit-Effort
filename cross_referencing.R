@@ -27,20 +27,18 @@ new_vTagID <- function(focal_vTagID){
     }
     return(as.integer(out_vTagID))
 }
-# Vectorized version
 vec_new_vTagID <- Vectorize(new_vTagID, 'focal_vTagID', USE.NAMES = FALSE)
 
 
 ## @knitr vTagID_from_PIT
-get_vTagID <- function(focal_PIT_Tag){
+vTagID_from_PIT <- function(focal_PIT_Tag){
     out_vTagID <- PITs_w_vTag$vTagID[PITs_w_vTag$PIT_Tag == focal_PIT_Tag]
     if (length(out_vTagID) == 0){
         return(NA)
     }
     return(out_vTagID)
 }
-# Vectorized version
-vec_get_vTagID <- Vectorize(get_vTagID, 'focal_PIT_Tag', USE.NAMES = FALSE)
+vec_vTagID_from_PIT <- Vectorize(vTagID_from_PIT, 'focal_PIT_Tag', USE.NAMES = FALSE)
 
 
 
@@ -50,29 +48,24 @@ vec_get_vTagID <- Vectorize(get_vTagID, 'focal_PIT_Tag', USE.NAMES = FALSE)
 
 ## @knitr read_Eglin
 Eglin <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/',
-                           'Copy of Eglin_List_InspectbyAdam.xlsx'), sheet = 2) %>% 
-    rename(vTagID_1 = V_TagID, vTagID_2 = old_V_TagID) %>%
-    select(vTagID_1, vTagID_2, Tag_description) %>%
-    rowwise %>%
+                           'Copy of Eglin_List_InspectbyAdam.xlsx'), 
+                    sheet = 2) %>% 
+    rename(vTagID = V_TagID) %>%
     mutate(Year = sapply(Tag_description, function(x){
         as.numeric(tail(strsplit(x, ' ')[[1]], 1))})) %>%
-    ungroup %>%
-    select(Year, vTagID_1, vTagID_2) %>%
-    gather(vTagID_name, vTagID, starts_with('vTagID')) %>%
-    select(-vTagID_name) %>%
+    select(Year, vTagID) %>%
     mutate(vTagID = vec_new_vTagID(vTagID))
-
 
 
 ## @knitr read_allGS
 allGS <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/', 
-                           'Copy of All_GS_transmitters_PCFRO_AdamInspect.xlsx'), na = 'NA', 
+                           'Copy of All_GS_transmitters_PCFRO_AdamInspect.xlsx'), 
+                    na = 'NA', 
                     col_types = c('text', 'date', rep('text', 4))) %>%
     rename(vTagID = Tag, PIT_Tag = `PIT  Tag`) %>%
     mutate(vTagID = as.numeric(gsub(' \\(F\\)', '', vTagID)),
            Site = paste(gsub(' ', '', River), 'River')) %>%
     mutate(vTagID = vec_new_vTagID(vTagID)) %>%
-    filter(!is.na(PIT_Tag) | !is.na(vTagID)) %>%
     select(Site, Date, vTagID, PIT_Tag)
 
 
@@ -109,6 +102,7 @@ Eglin_byYear <- Eglin %>%
     ungroup %>%
     mutate(Year_vTagID = paste(Year, vTagID, sep = '_'))
 
+
 ## @knitr comp_Eglin_sharedRow
 Eglin_byYear %>% 
     filter(Year_vTagID %in% masterCaps_byYear$Year_vTagID) %>%
@@ -118,19 +112,8 @@ masterCaps_byYear %>%
     as.data.frame
 
 ## @knitr comp_Eglin_vTagIDs_notInMaster
-Eglin_vTagIDs_notInMaster <- unique(Eglin$vTagID)[! unique(Eglin$vTagID) 
-                                                  %in% masterCaps$vTagID]
-# unique vTagIDs in `Eglin` but not in master
-length(Eglin_vTagIDs_notInMaster)
-# total unique vTagIDs present in `Eglin`
+length(unique(Eglin$vTagID)[! unique(Eglin$vTagID) %in% masterCaps$vTagID])
 length(unique(Eglin$vTagID))
-
-
-
-
-
-
-
 
 
 
@@ -164,37 +147,16 @@ length(unique(allGS_comp$vTagID))
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-## @knitr comp_filtDet
-filtDet
-
-# Rows in filtDet where vTagID not in masterCaps
-filtDet %>% 
-    filter(! vTagID %in% masterCaps$vTagID)
-
-
-# Number of unique vTagIDs in `filtDet` that are present in `masterCaps`
+## @knitr comp_filtDet_in_masterCaps
 length(unique(filtDet$vTagID)[! unique(filtDet$vTagID) %in% masterCaps$vTagID])
-# Total number of unique vTagIDs in `filtDet`
 length(unique(filtDet$vTagID))
 
-# Number of unique vTagIDs in `masterCaps` that are present in `filtDet`
+## @knitr comp_masterCaps_in_filtDet
 length(unique(masterCaps$vTagID)[ unique(masterCaps$vTagID) %in% filtDet$vTagID])
-# Total number of unique vTagIDs in `masterCaps`
 length(unique(masterCaps$vTagID))
 
 
-# Unique vTagIDs and whether or not they're present in masterCaps
+## @knitr comp_filtDet_in_masterCaps_Table
 filtDet_inMaster <- filtDet %>% 
     group_by(vTagID) %>%
     summarize(Rivers = River %>% unique %>% paste(., collapse = ':'),
@@ -203,13 +165,11 @@ filtDet_inMaster <- filtDet %>%
     select(inMaster, Rivers, vTagID)
 
 
+## @knitr comp_masterCaps_in_filtDet_Table
 masterCaps_inFD <- masterCaps %>% 
     mutate(inFD = vTagID %in% unique(filtDet$vTagID))
 
 
 
-# write_csv(filtDet_inMaster, './csv_out/filtDet_inMaster.csv')
-
-# write_csv(masterCaps_inFD, './csv_out/masterCaps_inFD.csv')
 
 

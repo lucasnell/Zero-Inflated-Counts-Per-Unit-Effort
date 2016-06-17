@@ -15,6 +15,7 @@ output:
 mainfont: Helvetica
 geometry: margin=1in
 fontsize: 10pt
+runtime: shiny
 ---
 
 ```{r setup, echo = FALSE}
@@ -31,7 +32,10 @@ knitr::read_chunk('cross_referencing.R')
 
 ## Required objects
 
-We need the objects created in the `identifiers` stage.
+We need some of the objects created in the `identifiers` stage. For `masterCaps`, I 
+explicitly specified the column types using `col_types = 'cDiiddc'` because by default 
+it was making the `TL_mm` column an integer, rather than double like the original data
+frame.
 
 ```{r read_ID_objects}
 ```
@@ -42,16 +46,25 @@ We need the objects created in the `identifiers` stage.
 Below tabs have lookup functions for individual character inputs, and "vectorized" 
 versions for vector input/output.
 
-### Retrieve newest `vTagID` from a vector of `vTagID`s
+### Retrieve newest `vTagID`(s) from `vTagID`(s)
+
+The function `new_vTagID` returns the newest `vTagID` from an input `vTagID` if that
+`vTagID` is from an equivalent pair/trio. If it was a unique `vTagID`, the input is 
+returned. `vec_new_vTagID` is the vectorized version that takes and returns a vector.
 
 ```{r newest_vTagID}
 ```
 
-### Retrieve `vTagID` from `PIT_Tag`
+### Retrieve `vTagID`(s) from `PIT_Tag`(s)
 
-Below isn't really necessary because the only data frame with a `PIT_Tag` column doesn't 
-have any rows with a `PIT_Tag` but no `vTagID`. 
-I'm leaving it here for reference only.
+> Below isn't really necessary because the only data frame with a `PIT_Tag` column doesn't 
+> have any rows with a `PIT_Tag` but no `vTagID`.  I'm leaving it here for reference only.
+
+The function `vTagID_from_PIT` returns the newest `vTagID` from an input `PIT_Tag` (the 
+`PITs_w_vTag` data frame already has any `vTagID`s that are part of an equivalent 
+pair/trio replaced with the newest one representing that individual).
+`vec_vTagID_from_PIT` is the vectorized version that takes and returns a vector.
+
 ```{r vTagID_from_PIT}
 ```
 
@@ -61,19 +74,57 @@ I'm leaving it here for reference only.
 
 ## `Eglin_List`...
 
+I extracted the year from column `"Tag_description"` by splitting it by spaces, then 
+retrieving the last string from that new character vector, then converting it to numeric.
+I also removed the `old_V_TagID` column, since I'm only concerned with the most recent 
+one.
+I lastly made sure all `vTagID`s, if part of an equivalent pair/trio, were the newest one
+representing that individual.
+
 ```{r read_Eglin}
 ```
 
 
+
 ## `All_GS_transmitters`...
+
+This Excel sheet had many blank cells and cells with `"NA"`, each of which signifying
+what in R would be `NA`. I had to change the blank ones to `"NA"` in Excel manually, 
+since the `readxl::read_excel` function does not allow multiple representations of `NA`.
+I also specified column types because some of the numbers were parsing incorrectly, 
+throwing up errors.
+
+I next removed the `"(F)"` from the `vTagID` column (note that inside the `gsub` function
+you must double-escape parentheses using `"\\("` or `"\\)"`) and converted `vTagID` to
+numeric.
+
+The `River` column had extra spaces in some cells. Since none of the items in this 
+column had >1 word, I simply removed all spaces. I then added `" River"` (`paste` 
+adds a space between entries by default) and called it `Site`.
+
+I lastly made sure all `vTagID`s, if part of an equivalent pair/trio, were the newest one
+representing that individual.
+
+This table did not have any `NA` `vTagID`s, but I would've included a check for that if 
+it was necessary.
 
 ```{r read_allGS}
 ```
+
+
 
 ## `filtered_detections`
 
 This differs from previous tables in that it's when individuals were detected by the
 receiver array, not when they were captured.
+
+The function `readr::read_rds` differs from other `readr` functions in that it returns
+a simple data frame, rather than the "`tbl`" data frame, so I added a line for that.
+I then assembled the `Date` column from the separate `Month`, `Day`, and `Year` columns.
+Next I renamed the `Transmitter` column to `vTagID`, removed unnecessary columns, 
+replaced dropped `vTagID`s, and arranged row by `River`, `Date`, `Receiver`, and 
+`vTagID`.
+
 ```{r read_filtered_detections}
 ```
 
@@ -82,22 +133,123 @@ receiver array, not when they were captured.
 
 # Comparing `Eglin` to master
 
+## Group by year
+
+Since I only have `Year` (rather than full dates) from the `Eglin` data frame, I'll group 
+by `Year` and compute how many times that individual was caught in that year. 
+I then created the `Year_vTagID` column, which contains the `Year` and `vTagID` pasted
+together and separated by an underscore. By comparing this column across data frames, I
+can assess what `Year`–`vTagID` combinations we're missing from `masterCaps`.
+
+```{r comp_Eglin_makeDFs}
+```
+
+
+## Shared rows
+
+By using the `Year_vTagID` column, I find that they share only one `vTagID`–`Year`
+combination.
+
+```{r comp_Eglin_sharedRow}
+```
+
+
+
+## `vTagID`s not in master
+
+Now I check how many unique `vTagID`s present in `Eglin` are not present in the master
+capture data frame. We find that 
+`r length(unique(Eglin$vTagID)[! unique(Eglin$vTagID) %in% masterCaps$vTagID])` out of 
+`r length(unique(Eglin$vTagID))` unique `vTagID`s in `Eglin` are not present in the 
+master capture data frame.
+
+```{r comp_Eglin_vTagIDs_notInMaster}
+```
+
+
+
 
 
 # Comparing `allGS` to master
+
+## Make `Date`–`vTagID` column
+
+Similar to what I did with the `Eglin` data frame, I created a `"Date_vTagID"` column
+that pastes together the `Date` and `vTagID` columns.
+
+```{r comp_allGS_makeDFs}
+```
+
+
+## Rows not in master
+
+Using the `Date_vTagID` column, I find that a little over half of the 
+`r nrow(allGS)` rows in `allGS` are not present in
+the master capture data frame. 
+
+```{r comp_allGS_rows_notInMaster}
+```
+
+
 
 
 
 # Comparing `filtDet` to master
 
+This data frame contains dates where individuals were detected on a receiver 
+array, *not* when they were captured, as in the master capture data frame (`masterCaps`).
+Thus I will not compare `Date`–`vTagID` combinations, just `vTagID`s.
 
 
+## vTagIDs from `filtDet` in `masterCaps`
+
+First, I find that 
+`r length(unique(filtDet$vTagID)[! unique(filtDet$vTagID) %in% masterCaps$vTagID])`
+out of 
+`r length(unique(filtDet$vTagID))` unique `vTagID`s from `filtDet` are already in the 
+master capture data frame.
+
+```{r comp_filtDet_in_masterCaps}
+```
 
 
+## vTagIDs from `masterCaps` in `filtDet`
+
+I also find that 
+`r length(unique(masterCaps$vTagID)[ unique(masterCaps$vTagID) %in% filtDet$vTagID])`
+out of 
+`r length(unique(masterCaps$vTagID))`
+unique `vTagID`s from `masterCaps` that are already in `filtDet`.
+
+```{r comp_masterCaps_in_filtDet}
+```
 
 
+## `filtDet` to `masterCaps` comparison table
+
+Table of unique `vTagID`s from `filtDet` and whether they're present in `masterCaps`. If
+an individual was caught in multiple rivers, I pasted them together, separated by `':'`.
+
+```{r comp_filtDet_in_masterCaps_Table}
+```
 
 
+## `masterCaps` to `filtDet` comparison table
+
+For this table, I simply recreated `masterCaps` with an extra column indicating whether 
+the vTagID was present in the `filtDet` data frame.
+
+```{r comp_masterCaps_in_filtDet_Table}
+```
+
+
+## Saving
+
+If you want to save these comparison tables as csv files:
+```{r writeTabs, eval = FALSE}
+write_csv(filtDet_inMaster, './csv_out/filtDet_inMaster.csv')
+write_csv(masterCaps_inFD, './csv_out/masterCaps_inFD.csv')
+```
 
 
 

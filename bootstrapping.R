@@ -12,7 +12,7 @@ library('RColorBrewer')
 
 
 ## @knitr inputData
-CPUEdf <- read_excel("brett_example.xlsx",1) %>% 
+CPUEdf <- read_excel("./from_Bill/brett_example.xlsx",1) %>% 
     rename(Area = `Effort m^2`, Count = SumOfSPEC) %>%
     filter(Year %in% 1993:2013, !is.na(Year), Month == 10, !is.na(Month)) %>%
     select(Year, Month, Station, Count, Area) %>%

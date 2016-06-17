@@ -20,3 +20,8 @@ to its original URL. The `compiling` html file would thus be:
 ```
 https://htmlpreview.github.io/?https://github.com/lucasnell/ziCPUE/blob/master/compiling.html
 ```
+
+### `session_info`
+
+The ends of documents will have `session_info`, per Karl Broman's
+[guide](http://kbroman.org/knitr_knutshell/pages/reproducible.html).

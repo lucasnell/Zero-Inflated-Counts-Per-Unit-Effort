@@ -97,6 +97,16 @@ filtered rows that didn't have either a `PIT_Tag` or `vTagID`.
 
 
 
+
+# Session information
+
+
+```{r session_info, include = TRUE, echo = TRUE, results = 'markup'}
+devtools::session_info()
+```
+
+
+
 <!---
 rmarkdown::render('compiling.Rmd', output_file = 'compiling.html')
 -->
