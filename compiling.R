@@ -14,7 +14,7 @@ library("readr")
 Apal <- suppressWarnings(
     read_excel(paste0("~/Google Drive/Gulf sturgeon/Adam/Final NRDA_Blood.xlsx")))
 Suwa <- read_excel(paste0("~/Google Drive/Gulf sturgeon/Randall/Melissa/",
-                          "Copy of Suwannee.xlsx"), 
+                          "Copy of Suwannee July 1 2016.xlsx"), 
                    sheet = 2)
 Pearl <- read_csv(paste0("~/Google Drive/Gulf sturgeon/Western/",
                          "PR_Master_Sturgeon_only.csv"),
@@ -25,6 +25,22 @@ Choc <- suppressWarnings(
     read_excel(paste0("~/Google Drive/Gulf sturgeon/Choctawhatchee/",
                       "Choc_Sturgeon_transmitter_2010_2012.xlsx"), 
                na = 'NA'))
+Yell <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/',
+                          'Yellow_Escambia_vTagID_update_June_2016.xlsx'),
+                   na = 'NA')
+
+Panh <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/From Frank July 2016/',
+                  'Panhandle_rivers_Frank_July_2016.xlsx'))
+
+Nrda <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/',
+                          'Final NRDA_Blood_updated_July_2016.xlsx'), 
+                   col_types = c('text', 'date', rep('text', 6), 'numeric', 
+                                 rep('text', 4), 'numeric', 'numeric', 
+                                 rep('text', 78-15)))
+
+
+
+
 
 
 ## @knitr manApal
@@ -112,6 +128,57 @@ Choc <- Choc %>%
 
 
 
+## @knitr manYell
+Yell <- Yell %>%
+    rename(
+        PIT_Tag1 = `PIT  Tag`, 
+        PIT_Tag2 = `PIT (old)`,
+        FL_mm = `F L (mm)`, 
+        TL_mm = `T L (mm)`) %>%
+    mutate(
+        Date = as.Date(Date),
+        Site = gsub('_', ' ', Site) %>% str_to_title
+    ) %>%
+    select(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
+
+
+
+## @knitr manPanh
+Panh <- Panh %>%
+    mutate(
+        vTagID = as.integer(vTagID),
+        vSerial = as.character(vSerial),
+        FL_mm = FL_cm * 10, 
+        TL_mm = TL_cm * 10,
+        PIT_Tag1 = as.character(PIT_new), 
+        PIT_Tag2 = as.character(PIT_old),
+        Date = as.Date(Date),
+        Site = paste0(gsub('_', ' ', River) %>% str_to_title, ' River'),
+        Internal = (Internal_External == 'Internal')
+    ) %>%
+    select(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm, Internal)
+
+
+
+
+## @knitr manNrda
+Nrda <- Nrda %>% select(2:15) %>%
+    mutate(
+        vTagID = as.integer(V_TagID),
+        vSerial = as.character(V_Serial),
+        FL_mm = FL_cm * 10, 
+        TL_mm = TL_cm * 10,
+        PIT_Tag1 = as.character(PIT_New), 
+        PIT_Tag2 = as.character(Pit_Old),
+        Date = as.Date(Date),
+        Site = gsub('_', ' ', Site) %>% str_to_title
+    ) %>%
+    select(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
+
+
+
+
+
 
 ## @knitr gatherFun
 gatherByPIT <- function(df){
@@ -125,8 +192,9 @@ gatherByPIT <- function(df){
 
 
 
+
 ## @knitr runGather
-allSites <- lapply(list(Apal, Suwa, Pearl, Pasc, Choc), gatherByPIT) %>% 
+allSites <- lapply(list(Apal, Suwa, Pearl, Pasc, Choc, Yell, Panh, Nrda), gatherByPIT) %>% 
     bind_rows
 allSites
 
