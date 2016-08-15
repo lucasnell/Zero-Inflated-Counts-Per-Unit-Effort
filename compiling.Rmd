@@ -66,11 +66,31 @@ beginning.
 ``` {r manPasc}
 ```
 
-
 ## Choctawhatchee
-
 ```{r manChoc}
 ```
+
+
+
+## Yellow Escambia
+```{r manYell}
+```
+
+
+## Panhandle rivers
+```{r manPanh}
+```
+
+
+## 
+```{r manPrma}
+```
+
+
+## Pearl (ERDC)
+```{r manErdc}
+```
+
 
 
 
