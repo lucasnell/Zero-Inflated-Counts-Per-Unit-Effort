@@ -30,8 +30,8 @@ knitr::read_chunk('identifiers.R')
 
 ## Required objects
 
-We need the objects created in the compiling stage.
-
+We need the `allSites` data frame created in the compiling stage. The `rm` command 
+removes all other objects created in `compiling.R`.
 ```{r sourceCompiling}
 ```
 
@@ -133,7 +133,9 @@ is in the `"newest"` column.
 
 The code chunk below does the following:
 
-1. Create a data frame, with the following named columns:
+1. Create a data frame using `data_frame` from package `tibble`, which is faster and
+   automatically adds `tbl_df` class to output.
+2. Add the following named columns to the data frame:
     a. `"input"`: The first 3 columns of `equiv_vTagID_PIT` turned into a single vector.
     b. `"newest"`: `apply` the `findNewest_vTagID` function across rows of the
        `equiv_vTagID_PIT` data frame, but only including the first 3 columns (the 
@@ -141,8 +143,7 @@ The code chunk below does the following:
        I also used `repeat` on `newest_vTagIDs` with the option `each = 3`, to make 
        this vector the same length as that in the `"input"` entry and to make 
        them refer to the same individual at all locations across both vectors.
-2. Combine these vectors into a single data frame (`equiv_vTagID`), and remove any rows
-   where `input` is not present.
+3. Remove any rows where `input` is not present.
 
 ```{r equiv_vTagID}
 ```
@@ -162,7 +163,7 @@ equivRows <-
            PIT_Tag %in% equiv_vTagID_PIT$PIT_Tag) %>% 
     arrange(Site, PIT_Tag, vTagID)
 
-write_csv(equivRows, '../csv_out/equivalent_vTagIDs.csv')
+write_csv(equivRows, './csv_out/equivalent_vTagIDs.csv')
 ```
 
 

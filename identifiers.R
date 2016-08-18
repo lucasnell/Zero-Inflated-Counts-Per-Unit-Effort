@@ -11,7 +11,7 @@ library("readr")
 
 ## @knitr sourceCompiling
 source("compiling.R")
-
+rm(list = ls(pattern = '_df|gather'))
 
 
 ## @knitr unique_PITs_per_vTag
@@ -22,6 +22,7 @@ unique_PITs_Tab <- allSites %>%
     select(uniquePITs) %>% 
     table
 unique_PITs_Tab
+
 
 ## @knitr unique_vTags_per_PIT
 unique_vTags_Tab <- allSites %>%
@@ -95,12 +96,11 @@ equiv_vTagID_PIT <-
 
 
 ## @knitr equiv_vTagID
-equiv_vTagID <- data.frame(input = as.vector(t(equiv_vTagID_PIT[,1:maxUniques])),
+equiv_vTagID <- data_frame(input = as.vector(t(equiv_vTagID_PIT[,1:maxUniques])),
                            newest = rep(apply(equiv_vTagID_PIT[,1:maxUniques], 1, 
                                               findNewest_vTagID),
                                         each = maxUniques)) %>% 
-    filter(!is.na(input)) %>%
-    as.tbl
+    filter(!is.na(input))
 
 
 
@@ -189,7 +189,6 @@ allSites_newIDs <- allSites %>%
                                    x)
                         })
     )
-
 
 ## @knitr knownID_master
 valid_vTagID <- allSites_newIDs %>% filter(!is.na(vTagID))

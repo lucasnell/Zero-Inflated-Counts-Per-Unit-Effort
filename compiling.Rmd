@@ -54,23 +54,26 @@ beginning.
 ```
 
 ## Suwannee
-*Note:* This one also had some rows full of `NA`s, hence the `filter` command at the end.
+*Note:* This one had no `vSerial` column, hence it's not present in the `select` command.
 ``` {r manSuwa}
 ```
 
 ## Pearl
+*Note:* This one also had some rows full of `NA`s, hence the `filter` command at the 
+beginning.
 ``` {r manPearl}
 ```
 
 ## Pascagoula
+*Note:* This one only had one PIT tag column and none for `vSerial`, hence no `PIT_Tag2`
+or `vSerial` in the `select` command.
 ``` {r manPasc}
 ```
 
 ## Choctawhatchee
+*Note:* This one had no `vSerial` column, hence it's not present in the `select` command.
 ```{r manChoc}
 ```
-
-
 
 ## Yellow Escambia
 ```{r manYell}
@@ -78,16 +81,14 @@ beginning.
 
 
 ## Panhandle rivers
+*Note:* The `Internal` column is a logical vector specifying whether the tag for the 
+captured individual was internal.
 ```{r manPanh}
 ```
 
 
-## 
-```{r manPrma}
-```
-
-
 ## Pearl (ERDC)
+*Note:* This one only had one PIT tag column, hence no `PIT_Tag2` in the `select` command.
 ```{r manErdc}
 ```
 
@@ -96,20 +97,38 @@ beginning.
 
 # Gathering by PIT and combining
 
+## Gather function
 The below function uses `gather` to gather `PIT_Tag1` and `PIT_Tag2` into a single
 `PIT_Tag` column, resulting in more rows but "tidier" data. This tidiness allows me to 
 more easily combine the data frames into one and to match `PIT_Tag`s with `vTagID`s. 
 The filter operation removes rows where `is.na(PIT_Tag)` and the associated
 `vTagID`--`Date` combination has already been represented in another row. 
 I removed `PIT_name` because it is useless for downstream processes.
-
+I lastly filtered rows that didn't have either a `PIT_Tag` or `vTagID` because they, too,
+are useless.
 ``` {r gatherFun}
 ```
 
 
-Now we run the function on all data frames and combine them into one. Since I made the 
-data frames exactly the same above, combining them now is quite simple. I also
-filtered rows that didn't have either a `PIT_Tag` or `vTagID`.
+## *Side note*: `eval(as.name(x))`
+The command `eval(as.name(x))` takes a character `x` and evaluates it as a named 
+variable. Try the following code for an idea of what this does:
+```{r evalCall, eval = FALSE}
+duf <- data.frame(x = seq(10), y = seq(11, 20))
+eval(as.name('duf'))
+
+foo <- function(x){x ** 2}
+eval(as.name('foo'))(5)
+```
+
+
+## Gathering all data frames and combining
+Now we run the function on all data frames and combine them into one. 
+Because I named all data frames with names ending in `'_df'`, I can filter for just
+data frames in the `ls` command using the `pattern` argument.
+On each of these character inputs, I use the `eval(as.name(x))` command discussed above.
+Since I made the data frames nearly exactly the same above, combining them now is 
+quite simple.
 ```{r runGather}
 ```
 

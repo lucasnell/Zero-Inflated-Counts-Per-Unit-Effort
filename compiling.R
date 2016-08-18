@@ -11,14 +11,16 @@ library("readr")
 
 
 ## @knitr inputs
-apal_df <- suppressWarnings(
-    read_excel(paste0("~/Google Drive/Gulf sturgeon/Adam/Final NRDA_Blood.xlsx")))
+apal_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/',
+                             'Final NRDA_Blood_updated_July_2016.xlsx'), 
+                      col_types = c('text', 'date', rep('text', 6), 'numeric', 
+                                    rep('text', 4), 'numeric', 'numeric', 
+                                    rep('text', 78-15)))
 suwa_df <- read_excel(paste0("~/Google Drive/Gulf sturgeon/Randall/Melissa/",
                           "Copy of Suwannee July 1 2016.xlsx"), 
                    sheet = 2)
-pearl_df <- read_csv(paste0("~/Google Drive/Gulf sturgeon/Western/",
-                         "PR_Master_Sturgeon_only.csv"),
-                  locale = locale(date_format = "%m/%d/%Y"))
+pearl_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Western/',
+                              'PR_Master_Sturgeon_July_2016.xlsx')) %>% names
 pasc_df <- read_excel(paste0("~/Google Drive/Gulf sturgeon/Western/",
                           "Copy of MSP_GS_Tagdata_Pascagoula.xlsx"))
 choc_df <- suppressWarnings(
@@ -28,19 +30,8 @@ choc_df <- suppressWarnings(
 yell_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/',
                           'Yellow_Escambia_vTagID_update_June_2016.xlsx'),
                    na = 'NA')
-
 panh_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/From Frank July 2016/',
                   'Panhandle_rivers_Frank_July_2016.xlsx'))
-
-nrda_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/',
-                          'Final NRDA_Blood_updated_July_2016.xlsx'), 
-                   col_types = c('text', 'date', rep('text', 6), 'numeric', 
-                                 rep('text', 4), 'numeric', 'numeric', 
-                                 rep('text', 78-15)))
-
-prma_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Western/',
-                          'PR_Master_Sturgeon_July_2016.xlsx'))
-
 erdc_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Western/',
                           'Pearl_ERDC_Todd_June_23_2016.xlsx'))
 
@@ -49,18 +40,16 @@ erdc_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Western/',
 
 
 
-
 ## @knitr manApal
-apal_df <- apal_df %>%
-    select(1:21) %>%
-    rename(
-        PIT_Tag1 = PIT_New, 
-        PIT_Tag2 = Pit_Old,
-        vTagID = V_TagID,
-        vSerial = V_Serial) %>%
+apal_df <- apal_df %>% 
+    select(2:15) %>%
     mutate(
-        FL_mm = FL_cm*10, 
-        TL_mm = TL_cm*10,
+        vTagID = as.integer(V_TagID),
+        vSerial = as.character(V_Serial),
+        FL_mm = FL_cm * 10, 
+        TL_mm = TL_cm * 10,
+        PIT_Tag1 = as.character(PIT_New), 
+        PIT_Tag2 = as.character(Pit_Old),
         Date = as.Date(Date),
         Site = gsub('_', ' ', Site) %>% str_to_title
     ) %>%
@@ -82,24 +71,25 @@ suwa_df <- suwa_df %>%
         Date = as.Date(Date),
         Site = gsub('_', ' ', Site) %>% str_to_title
     ) %>%
-    select(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm) %>%
-    filter(!is.na(Site))
+    select(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
 
 
 ## @knitr manPearl
-pearl_df <- pearl_df %>% 
+pearl_df <- pearl_df %>%
+    filter(Species == 'Gulf_Sturgeon') %>% 
     mutate(
-        Date = as.Date(Date),
-        Site = "Pearl", 
-        FL_mm = `FL-cm`*10, 
-        TL_mm = `TL-cm`*10
+        Date = as.Date(paste(Month, Day, Year, sep = '-'), format = '%m-%d-%Y'),
+        Site = gsub('_', ' ', `Capture Water Body`) %>% str_to_title,
+        FL_mm = `FL-cm` * 10,
+        TL_mm = `TL-cm` * 10,
+        PIT_Tag1 = ifelse(!is.na(`Converted PIT Tag (hexadecimal format)`), 
+                          `Converted PIT Tag (hexadecimal format)`, 
+                          `Pit Tag`),
+        vTagID = as.integer(Tel_tag_code),
+        vSerial = as.character(Tel_tag_SN),
+        PIT_Tag2 = as.character(`old_Pit_tag`)
     ) %>%
-    rename(
-        vTagID = Tel_tag_code, 
-        PIT_Tag1 = `Pit Tag`,
-        PIT_Tag2 = old_Pit_tag
-    ) %>%
-    select(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
+    select(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
 
 
 ## @knitr manPasc
@@ -166,44 +156,6 @@ panh_df <- panh_df %>%
     select(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm, Internal)
 
 
-
-
-## @knitr manNrda
-nrda_df <- nrda_df %>% 
-    select(2:15) %>%
-    mutate(
-        vTagID = as.integer(V_TagID),
-        vSerial = as.character(V_Serial),
-        FL_mm = FL_cm * 10, 
-        TL_mm = TL_cm * 10,
-        PIT_Tag1 = as.character(PIT_New), 
-        PIT_Tag2 = as.character(Pit_Old),
-        Date = as.Date(Date),
-        Site = gsub('_', ' ', Site) %>% str_to_title
-    ) %>%
-    select(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
-
-
-
-## @knitr manPrma
-prma_df <- prma_df %>%
-    mutate(
-        Date = as.Date(paste(Month, Day, Year, sep = '-'), format = '%m-%d-%Y'),
-        Site = gsub('_', ' ', `Capture Water Body`) %>% str_to_title,
-        FL_mm = `FL-cm` * 10,
-        TL_mm = `TL-cm` * 10,
-        PIT_Tag1 = ifelse(!is.na(`Converted PIT Tag (hexadecimal format)`), 
-                          `Converted PIT Tag (hexadecimal format)`, 
-                          `Pit Tag`),
-        vTagID = as.integer(Tel_tag_code),
-        vSerial = as.character(Tel_tag_SN),
-        PIT_Tag2 = as.character(`old_Pit_tag`)
-    ) %>%
-    select(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)
-
-
-
-
 ## @knitr manErdc
 erdc_df <- erdc_df %>%
     mutate(
@@ -221,7 +173,8 @@ gatherByPIT <- function(df){
     df %>%
         gather(PIT_name, PIT_Tag, starts_with('PIT_Tag', ignore.case = FALSE)) %>%
         filter(PIT_name == 'PIT_Tag1' | !is.na(PIT_Tag)) %>%
-        select(-PIT_name)
+        select(-PIT_name) %>% 
+        filter(!is.na(vTagID) | !is.na(PIT_Tag))
 }
 
 
