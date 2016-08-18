@@ -38,8 +38,6 @@ erdc_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Western/',
 
 
 
-
-
 ## @knitr manApal
 apal_df <- apal_df %>% 
     select(2:15) %>%

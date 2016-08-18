@@ -250,9 +250,13 @@ in some rows that don't have `vTagID`s, but do have `PIT_Tag`s. I combined these
 with those from `allSites` that already have valid (i.e., non-`NA`) `vTagID`s to create
 a data frame of all observations with known identifiers.
 
-In creating the `valid_PIT` data frame, I'm wrapping the `PIT_to_vTagID` function inside
-the `Vectorize` function so that the new "vectorized" function uses and returns a
-vector. I could have also used `sapply` as I did above, but `Vectorize` was simpler in 
+To avoid creating temporary objects, both sets of rows were created on the fly as data 
+frames within a list.
+
+In creating the second data frame (with `NA` vTagIDs but valid PIT tags), I'm wrapping 
+the `PIT_to_vTagID` function inside the `Vectorize` function so that the new 
+"vectorized" function uses and returns a vector. 
+I could have also used `sapply` as I did above, but `Vectorize` was simpler in 
 this case, since I'd already created the base function.
 For more information on vectorization, see
 [here](http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html).

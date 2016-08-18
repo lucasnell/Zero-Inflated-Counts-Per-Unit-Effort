@@ -191,14 +191,16 @@ allSites_newIDs <- allSites %>%
     )
 
 ## @knitr knownID_master
-valid_vTagID <- allSites_newIDs %>% filter(!is.na(vTagID))
+masterCaps <- list(
+    # valid vTagIDs:
+    allSites_newIDs %>% filter(!is.na(vTagID)),
+    # NA vTagIDs, but valid PITs:
+    allSites_newIDs %>%
+        filter(is.na(vTagID),
+               PIT_Tag %in% vTagID_PIT$PIT_Tag) %>%
+        mutate(vTagID = Vectorize(PIT_to_vTagID, 'in_PIT', USE.NAMES = FALSE)(PIT_Tag))
+    ) %>% 
+    bind_rows
 
-valid_PIT <- allSites_newIDs %>%
-    filter(is.na(vTagID),
-           PIT_Tag %in% vTagID_PIT$PIT_Tag) %>%
-    mutate(vTagID = Vectorize(PIT_to_vTagID, 'in_PIT', USE.NAMES = FALSE)(PIT_Tag))
 
-masterCaps <- bind_rows(valid_vTagID, valid_PIT)
-
-rm(valid_vTagID, valid_PIT)
 
