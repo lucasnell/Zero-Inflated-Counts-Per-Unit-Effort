@@ -182,3 +182,8 @@ allSites <- lapply(ls(pattern = '_df'), function(x) eval(as.name(x))) %>%
     bind_rows
 allSites
 
+
+# Looking at lengths of PIT tags
+# allSites %>% filter(! grepl('[[:alpha:]]', PIT_Tag), !is.na(PIT_Tag))
+# allSites %>% filter(!is.na(PIT_Tag)) %>% mutate(pit_len = str_length(PIT_Tag)) %>% select(pit_len) %>% table
+
