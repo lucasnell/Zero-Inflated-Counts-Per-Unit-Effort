@@ -20,7 +20,7 @@ suwa_df <- read_excel(paste0("~/Google Drive/Gulf sturgeon/Randall/Melissa/",
                           "Copy of Suwannee July 1 2016.xlsx"), 
                    sheet = 2)
 pearl_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Western/',
-                              'PR_Master_Sturgeon_July_2016.xlsx')) %>% names
+                              'PR_Master_Sturgeon_July_2016.xlsx'))
 pasc_df <- read_excel(paste0("~/Google Drive/Gulf sturgeon/Western/",
                           "Copy of MSP_GS_Tagdata_Pascagoula.xlsx"))
 choc_df <- suppressWarnings(
@@ -34,7 +34,6 @@ panh_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Adam/From Frank July 
                   'Panhandle_rivers_Frank_July_2016.xlsx'))
 erdc_df <- read_excel(paste0('~/Google Drive/Gulf sturgeon/Western/',
                           'Pearl_ERDC_Todd_June_23_2016.xlsx'))
-
 
 
 
