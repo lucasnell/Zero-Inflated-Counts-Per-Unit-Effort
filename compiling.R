@@ -183,7 +183,28 @@ allSites <- lapply(ls(pattern = '_df'), function(x) eval(as.name(x))) %>%
 allSites
 
 
+
+
+# Looking at weird site names...
+allSites %>% select(Site) %>% unique %>% as.data.frame# %>% 
+#     write_csv(x = ., path = '~/Desktop/sites.csv')
+
+
+ls(pattern = '_df')[(lapply(ls(pattern = '_df'), function(x) eval(as.name(x))) %>%
+    lapply(., function(df){
+        ifelse(any(grepl('Ocklocknee', df$Site)), TRUE, FALSE)
+    }) %>% unlist)]
+
+
+
+
+
+
 # Looking at lengths of PIT tags
 # allSites %>% filter(! grepl('[[:alpha:]]', PIT_Tag), !is.na(PIT_Tag))
-# allSites %>% filter(!is.na(PIT_Tag)) %>% mutate(pit_len = str_length(PIT_Tag)) %>% select(pit_len) %>% table
+# 
+# allSites %>% 
+#     filter(!is.na(PIT_Tag)) %>% 
+#     mutate(pit_len = str_length(PIT_Tag)) %>% 
+#     select(pit_len) %>% table
 
