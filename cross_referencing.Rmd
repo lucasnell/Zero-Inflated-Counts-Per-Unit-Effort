@@ -206,7 +206,7 @@ Thus I will not compare `Date`–`vTagID` combinations, just `vTagID`s.
 First, I find that 
 `r length(unique(filtDet$vTagID)[! unique(filtDet$vTagID) %in% masterCaps$vTagID])`
 out of 
-`r length(unique(filtDet$vTagID))` unique `vTagID`s from `filtDet` are already in the 
+`r length(unique(filtDet$vTagID))` unique `vTagID`s from `filtDet` are not already in the 
 master capture data frame.
 
 ```{r comp_filtDet_in_masterCaps}

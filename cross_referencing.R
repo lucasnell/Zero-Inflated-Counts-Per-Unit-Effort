@@ -10,10 +10,9 @@ library("readr")
 library('readxl')
 
 ## @knitr read_ID_objects
-masterCaps <- read_csv('./csv_out/masterCaps.csv', col_types = 'cDiiddc')
-dropped_vTagIDs <- read_csv('./csv_out/dropped_vTagIDs.csv')
-PITs_w_vTag <- read_csv('./csv_out/PITs_w_vTag.csv')
-
+masterCaps <- read_csv('./csv_out/masterCaps.csv', col_types = 'cDiiddcl')
+dropped_vTagIDs <- read_csv('./csv_out/dropped_vTagIDs.csv', col_types = 'ii')
+PITs_w_vTag <- read_csv('./csv_out/PITs_w_vTag.csv', col_types = 'cci')
 
 
 
