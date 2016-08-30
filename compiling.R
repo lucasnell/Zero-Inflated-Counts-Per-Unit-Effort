@@ -183,23 +183,22 @@ allSites <- lapply(ls(pattern = '_df'), function(x) eval(as.name(x))) %>%
 allSites
 
 
-
-
-# Looking at weird site names...
-allSites %>% select(Site) %>% unique %>% as.data.frame# %>% 
-#     write_csv(x = ., path = '~/Desktop/sites.csv')
-
-
-ls(pattern = '_df')[(lapply(ls(pattern = '_df'), function(x) eval(as.name(x))) %>%
-    lapply(., function(df){
-        ifelse(any(grepl('Ocklocknee', df$Site)), TRUE, FALSE)
-    }) %>% unlist)]
-
-
-
+## @knitr cleanSites
+name_df <- read_csv('./csv_in/site_name_corrections.csv', col_types = 'ccc')
+get_sys <- function(sites){
+    sapply(sites, function(x){name_df$System[name_df$Site == x]})
+}
+get_sub <- function(sites){
+    sapply(sites, function(x){name_df$Subsystem[name_df$Site == x]})
+}
+allSites <- allSites %>% 
+    mutate(System = get_sys(Site), Subsystem = get_sub(Site)) %>%
+    select(System, Subsystem, Date, vTagID, vSerial, TL_mm, FL_mm, PIT_Tag, Internal)
 
 
 
+## @knitr fixPITs
+# The below code is not currently in use. It's here bc I will later be fixing PIT tags.
 # Looking at lengths of PIT tags
 # allSites %>% filter(! grepl('[[:alpha:]]', PIT_Tag), !is.na(PIT_Tag))
 # 

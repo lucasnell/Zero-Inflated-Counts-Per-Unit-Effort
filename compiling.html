@@ -157,9 +157,17 @@ $(document).ready(function () {
 <li><a href="#pearl"><span class="toc-section-number">3.3</span> Pearl</a></li>
 <li><a href="#pascagoula"><span class="toc-section-number">3.4</span> Pascagoula</a></li>
 <li><a href="#choctawhatchee"><span class="toc-section-number">3.5</span> Choctawhatchee</a></li>
+<li><a href="#yellow-escambia"><span class="toc-section-number">3.6</span> Yellow Escambia</a></li>
+<li><a href="#panhandle-rivers"><span class="toc-section-number">3.7</span> Panhandle rivers</a></li>
+<li><a href="#pearl-erdc"><span class="toc-section-number">3.8</span> Pearl (ERDC)</a></li>
 </ul></li>
-<li><a href="#gathering-by-pit-and-combining"><span class="toc-section-number">4</span> Gathering by PIT and combining</a></li>
-<li><a href="#session-information"><span class="toc-section-number">5</span> Session information</a></li>
+<li><a href="#gathering-by-pit-and-combining"><span class="toc-section-number">4</span> Gathering by PIT and combining</a><ul>
+<li><a href="#gather-function"><span class="toc-section-number">4.1</span> Gather function</a></li>
+<li><a href="#side-note-evalas.namex"><span class="toc-section-number">4.2</span> <em>Side note</em>: <code>eval(as.name(x))</code></a></li>
+<li><a href="#gathering-all-data-frames-and-combining"><span class="toc-section-number">4.3</span> Gathering all data frames and combining</a></li>
+</ul></li>
+<li><a href="#cleaning-site-names"><span class="toc-section-number">5</span> Cleaning <code>Site</code> names</a></li>
+<li><a href="#session-information"><span class="toc-section-number">6</span> Session information</a></li>
 </ul>
 </div>
 
@@ -177,43 +185,50 @@ $(document).ready(function () {
 <div id="reading-files" class="section level1">
 <h1><span class="header-section-number">2</span> Reading files</h1>
 <p>We are reading input files to <code>tbl_df</code>s named <code>Apal</code>, <code>Suwa</code>, <code>Pearl</code>, <code>Pasc</code>, and <code>Choc</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Apal &lt;-<span class="st"> </span><span class="kw">suppressWarnings</span>(
-    <span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">&quot;~/Google Drive/Gulf sturgeon/Adam/Final NRDA_Blood.xlsx&quot;</span>)))
-Suwa &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">&quot;~/Google Drive/Gulf sturgeon/Randall/Melissa/&quot;</span>,
-                          <span class="st">&quot;Copy of Suwannee.xlsx&quot;</span>), 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">apal_df &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">'~/Google Drive/Gulf sturgeon/Adam/'</span>,
+                             <span class="st">'Final NRDA_Blood_updated_July_2016.xlsx'</span>), 
+                      <span class="dt">col_types =</span> <span class="kw">c</span>(<span class="st">'text'</span>, <span class="st">'date'</span>, <span class="kw">rep</span>(<span class="st">'text'</span>, <span class="dv">6</span>), <span class="st">'numeric'</span>, 
+                                    <span class="kw">rep</span>(<span class="st">'text'</span>, <span class="dv">4</span>), <span class="st">'numeric'</span>, <span class="st">'numeric'</span>, 
+                                    <span class="kw">rep</span>(<span class="st">'text'</span>, <span class="dv">78-15</span>)))
+suwa_df &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">&quot;~/Google Drive/Gulf sturgeon/Randall/Melissa/&quot;</span>,
+                          <span class="st">&quot;Copy of Suwannee July 1 2016.xlsx&quot;</span>), 
                    <span class="dt">sheet =</span> <span class="dv">2</span>)
-Pearl &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">paste0</span>(<span class="st">&quot;~/Google Drive/Gulf sturgeon/Western/&quot;</span>,
-                         <span class="st">&quot;PR_Master_Sturgeon_only.csv&quot;</span>),
-                  <span class="dt">locale =</span> <span class="kw">locale</span>(<span class="dt">date_format =</span> <span class="st">&quot;%m/%d/%Y&quot;</span>))
-Pasc &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">&quot;~/Google Drive/Gulf sturgeon/Western/&quot;</span>,
+pearl_df &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">'~/Google Drive/Gulf sturgeon/Western/'</span>,
+                              <span class="st">'PR_Master_Sturgeon_July_2016.xlsx'</span>))
+pasc_df &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">&quot;~/Google Drive/Gulf sturgeon/Western/&quot;</span>,
                           <span class="st">&quot;Copy of MSP_GS_Tagdata_Pascagoula.xlsx&quot;</span>))
-Choc &lt;-<span class="st"> </span><span class="kw">suppressWarnings</span>(
+choc_df &lt;-<span class="st"> </span><span class="kw">suppressWarnings</span>(
     <span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">&quot;~/Google Drive/Gulf sturgeon/Choctawhatchee/&quot;</span>,
                       <span class="st">&quot;Choc_Sturgeon_transmitter_2010_2012.xlsx&quot;</span>), 
-               <span class="dt">na =</span> <span class="st">'NA'</span>))</code></pre></div>
+               <span class="dt">na =</span> <span class="st">'NA'</span>))
+yell_df &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">'~/Google Drive/Gulf sturgeon/Adam/'</span>,
+                          <span class="st">'Yellow_Escambia_vTagID_update_June_2016.xlsx'</span>),
+                   <span class="dt">na =</span> <span class="st">'NA'</span>)
+panh_df &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">'~/Google Drive/Gulf sturgeon/Adam/From Frank July 2016/'</span>,
+                  <span class="st">'Panhandle_rivers_Frank_July_2016.xlsx'</span>))
+erdc_df &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">paste0</span>(<span class="st">'~/Google Drive/Gulf sturgeon/Western/'</span>,
+                          <span class="st">'Pearl_ERDC_Todd_June_23_2016.xlsx'</span>))</code></pre></div>
 </div>
 <div id="standardizing-data-frames" class="section level1 tabset">
 <h1><span class="header-section-number">3</span> Standardizing data frames</h1>
 <p>Each data frame was unique in its column names and overall setup. Below are some goals for the output data frames:</p>
 <ol style="list-style-type: decimal">
-<li>Contain as many of the following columns as possible: <code>Site</code>, <code>Date</code>, <code>vTagID</code>, <code>vSerial</code>, <code>PIT_Tag1</code>, <code>PIT_Tag2</code>, <code>TL_mm</code>, and <code>FL_mm</code> (equivalent columns<br />
-were converted using <code>rename</code> and selected for output using <code>select</code>)</li>
+<li>Contain as many of the following columns as possible: <code>Site</code>, <code>Date</code>, <code>vTagID</code>, <code>vSerial</code>, <code>PIT_Tag1</code>, <code>PIT_Tag2</code>, <code>TL_mm</code>, and <code>FL_mm</code> (equivalent columns were converted using <code>rename</code> and selected for output using <code>select</code>)</li>
 <li>Convert the <code>FL</code> and <code>TL</code> columns from centimeters to millimeters</li>
 <li>Standardize <code>Site</code> names and <code>Date</code> formats</li>
 </ol>
 <div id="apalach" class="section level2">
 <h2><span class="header-section-number">3.1</span> Apalach</h2>
 <p><em>Note:</em> This one also had many unneeded columns, hence the <code>select</code> command at the beginning.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Apal &lt;-<span class="st"> </span>Apal %&gt;%
-<span class="st">    </span><span class="kw">select</span>(<span class="dv">1</span>:<span class="dv">21</span>) %&gt;%
-<span class="st">    </span><span class="kw">rename</span>(
-        <span class="dt">PIT_Tag1 =</span> PIT_New, 
-        <span class="dt">PIT_Tag2 =</span> Pit_Old,
-        <span class="dt">vTagID =</span> V_TagID,
-        <span class="dt">vSerial =</span> V_Serial) %&gt;%
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">apal_df &lt;-<span class="st"> </span>apal_df %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">select</span>(<span class="dv">2</span>:<span class="dv">15</span>) %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(
-        <span class="dt">FL_mm =</span> FL_cm*<span class="dv">10</span>, 
-        <span class="dt">TL_mm =</span> TL_cm*<span class="dv">10</span>,
+        <span class="dt">vTagID =</span> <span class="kw">as.integer</span>(V_TagID),
+        <span class="dt">vSerial =</span> <span class="kw">as.character</span>(V_Serial),
+        <span class="dt">FL_mm =</span> FL_cm *<span class="st"> </span><span class="dv">10</span>, 
+        <span class="dt">TL_mm =</span> TL_cm *<span class="st"> </span><span class="dv">10</span>,
+        <span class="dt">PIT_Tag1 =</span> <span class="kw">as.character</span>(PIT_New), 
+        <span class="dt">PIT_Tag2 =</span> <span class="kw">as.character</span>(Pit_Old),
         <span class="dt">Date =</span> <span class="kw">as.Date</span>(Date),
         <span class="dt">Site =</span> <span class="kw">gsub</span>(<span class="st">'_'</span>, <span class="st">' '</span>, Site) %&gt;%<span class="st"> </span>str_to_title
     ) %&gt;%
@@ -221,8 +236,8 @@ were converted using <code>rename</code> and selected for output using <code>sel
 </div>
 <div id="suwannee" class="section level2">
 <h2><span class="header-section-number">3.2</span> Suwannee</h2>
-<p><em>Note:</em> This one also had some rows full of <code>NA</code>s, hence the <code>filter</code> command at the end.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Suwa &lt;-<span class="st"> </span>Suwa %&gt;%
+<p><em>Note:</em> This one had no <code>vSerial</code> column, hence it’s not present in the <code>select</code> command.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">suwa_df &lt;-<span class="st"> </span>suwa_df %&gt;%
 <span class="st">    </span><span class="kw">rename</span>(
         <span class="dt">vTagID =</span> <span class="st">`</span><span class="dt">ACOUSTIC TAG #</span><span class="st">`</span>,
         <span class="dt">PIT_Tag1 =</span> <span class="st">`</span><span class="dt">TAG 9    PIT TAG (ANTERIOR D FIN BASE)</span><span class="st">`</span>,
@@ -236,28 +251,31 @@ were converted using <code>rename</code> and selected for output using <code>sel
         <span class="dt">Date =</span> <span class="kw">as.Date</span>(Date),
         <span class="dt">Site =</span> <span class="kw">gsub</span>(<span class="st">'_'</span>, <span class="st">' '</span>, Site) %&gt;%<span class="st"> </span>str_to_title
     ) %&gt;%
-<span class="st">    </span><span class="kw">select</span>(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm) %&gt;%
-<span class="st">    </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(Site))</code></pre></div>
+<span class="st">    </span><span class="kw">select</span>(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)</code></pre></div>
 </div>
 <div id="pearl" class="section level2">
 <h2><span class="header-section-number">3.3</span> Pearl</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Pearl &lt;-<span class="st"> </span>Pearl %&gt;%<span class="st"> </span>
+<p><em>Note:</em> This one also had some rows full of <code>NA</code>s, hence the <code>filter</code> command at the beginning.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pearl_df &lt;-<span class="st"> </span>pearl_df %&gt;%
+<span class="st">    </span><span class="kw">filter</span>(Species ==<span class="st"> 'Gulf_Sturgeon'</span>) %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">mutate</span>(
-        <span class="dt">Date =</span> <span class="kw">as.Date</span>(Date),
-        <span class="dt">Site =</span> <span class="st">&quot;Pearl&quot;</span>, 
-        <span class="dt">FL_mm =</span> <span class="st">`</span><span class="dt">FL-cm</span><span class="st">`</span>*<span class="dv">10</span>, 
-        <span class="dt">TL_mm =</span> <span class="st">`</span><span class="dt">TL-cm</span><span class="st">`</span>*<span class="dv">10</span>
+        <span class="dt">Date =</span> <span class="kw">as.Date</span>(<span class="kw">paste</span>(Month, Day, Year, <span class="dt">sep =</span> <span class="st">'-'</span>), <span class="dt">format =</span> <span class="st">'%m-%d-%Y'</span>),
+        <span class="dt">Site =</span> <span class="kw">gsub</span>(<span class="st">'_'</span>, <span class="st">' '</span>, <span class="st">`</span><span class="dt">Capture Water Body</span><span class="st">`</span>) %&gt;%<span class="st"> </span>str_to_title,
+        <span class="dt">FL_mm =</span> <span class="st">`</span><span class="dt">FL-cm</span><span class="st">`</span> *<span class="st"> </span><span class="dv">10</span>,
+        <span class="dt">TL_mm =</span> <span class="st">`</span><span class="dt">TL-cm</span><span class="st">`</span> *<span class="st"> </span><span class="dv">10</span>,
+        <span class="dt">PIT_Tag1 =</span> <span class="kw">ifelse</span>(!<span class="kw">is.na</span>(<span class="st">`</span><span class="dt">Converted PIT Tag (hexadecimal format)</span><span class="st">`</span>), 
+                          <span class="st">`</span><span class="dt">Converted PIT Tag (hexadecimal format)</span><span class="st">`</span>, 
+                          <span class="st">`</span><span class="dt">Pit Tag</span><span class="st">`</span>),
+        <span class="dt">vTagID =</span> <span class="kw">as.integer</span>(Tel_tag_code),
+        <span class="dt">vSerial =</span> <span class="kw">as.character</span>(Tel_tag_SN),
+        <span class="dt">PIT_Tag2 =</span> <span class="kw">as.character</span>(<span class="st">`</span><span class="dt">old_Pit_tag</span><span class="st">`</span>)
     ) %&gt;%
-<span class="st">    </span><span class="kw">rename</span>(
-        <span class="dt">vTagID =</span> Tel_tag_code, 
-        <span class="dt">PIT_Tag1 =</span> <span class="st">`</span><span class="dt">Pit Tag</span><span class="st">`</span>,
-        <span class="dt">PIT_Tag2 =</span> old_Pit_tag
-    ) %&gt;%
-<span class="st">    </span><span class="kw">select</span>(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)</code></pre></div>
+<span class="st">    </span><span class="kw">select</span>(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)</code></pre></div>
 </div>
 <div id="pascagoula" class="section level2">
 <h2><span class="header-section-number">3.4</span> Pascagoula</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Pasc &lt;-<span class="st"> </span>Pasc %&gt;%
+<p><em>Note:</em> This one only had one PIT tag column and none for <code>vSerial</code>, hence no <code>PIT_Tag2</code> or <code>vSerial</code> in the <code>select</code> command.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pasc_df &lt;-<span class="st"> </span>pasc_df %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(
         <span class="dt">Date =</span> <span class="kw">as.Date</span>(Date_Tagged),
         <span class="dt">Site =</span> <span class="st">&quot;Pascagoula&quot;</span>,
@@ -272,7 +290,8 @@ were converted using <code>rename</code> and selected for output using <code>sel
 </div>
 <div id="choctawhatchee" class="section level2">
 <h2><span class="header-section-number">3.5</span> Choctawhatchee</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Choc &lt;-<span class="st"> </span>Choc %&gt;%
+<p><em>Note:</em> This one had no <code>vSerial</code> column, hence it’s not present in the <code>select</code> command.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">choc_df &lt;-<span class="st"> </span>choc_df %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(
         <span class="dt">FL_mm =</span> <span class="st">`</span><span class="dt">Fork Length (cm)</span><span class="st">`</span>*<span class="dv">10</span>,
         <span class="dt">TL_mm =</span> <span class="st">`</span><span class="dt">Total Length (cm)</span><span class="st">`</span>*<span class="dv">10</span>,
@@ -286,38 +305,111 @@ were converted using <code>rename</code> and selected for output using <code>sel
     ) %&gt;%
 <span class="st">    </span><span class="kw">select</span>(Site, Date, vTagID, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)</code></pre></div>
 </div>
+<div id="yellow-escambia" class="section level2">
+<h2><span class="header-section-number">3.6</span> Yellow Escambia</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">yell_df &lt;-<span class="st"> </span>yell_df %&gt;%
+<span class="st">    </span><span class="kw">rename</span>(
+        <span class="dt">PIT_Tag1 =</span> <span class="st">`</span><span class="dt">PIT  Tag</span><span class="st">`</span>, 
+        <span class="dt">PIT_Tag2 =</span> <span class="st">`</span><span class="dt">PIT (old)</span><span class="st">`</span>,
+        <span class="dt">FL_mm =</span> <span class="st">`</span><span class="dt">F L (mm)</span><span class="st">`</span>, 
+        <span class="dt">TL_mm =</span> <span class="st">`</span><span class="dt">T L (mm)</span><span class="st">`</span>) %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(
+        <span class="dt">Date =</span> <span class="kw">as.Date</span>(Date),
+        <span class="dt">Site =</span> <span class="kw">gsub</span>(<span class="st">'_'</span>, <span class="st">' '</span>, Site) %&gt;%<span class="st"> </span>str_to_title
+    ) %&gt;%
+<span class="st">    </span><span class="kw">select</span>(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm)</code></pre></div>
+</div>
+<div id="panhandle-rivers" class="section level2">
+<h2><span class="header-section-number">3.7</span> Panhandle rivers</h2>
+<p><em>Note:</em> The <code>Internal</code> column is a logical vector specifying whether the tag for the captured individual was internal.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">panh_df &lt;-<span class="st"> </span>panh_df %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(
+        <span class="dt">vTagID =</span> <span class="kw">as.integer</span>(vTagID),
+        <span class="dt">vSerial =</span> <span class="kw">as.character</span>(vSerial),
+        <span class="dt">FL_mm =</span> FL_cm *<span class="st"> </span><span class="dv">10</span>, 
+        <span class="dt">TL_mm =</span> TL_cm *<span class="st"> </span><span class="dv">10</span>,
+        <span class="dt">PIT_Tag1 =</span> <span class="kw">as.character</span>(PIT_new), 
+        <span class="dt">PIT_Tag2 =</span> <span class="kw">as.character</span>(PIT_old),
+        <span class="dt">Date =</span> <span class="kw">as.Date</span>(Date),
+        <span class="dt">Site =</span> <span class="kw">paste0</span>(<span class="kw">gsub</span>(<span class="st">'_'</span>, <span class="st">' '</span>, River) %&gt;%<span class="st"> </span>str_to_title, <span class="st">' River'</span>),
+        <span class="dt">Internal =</span> (Internal_External ==<span class="st"> 'Internal'</span>)
+    ) %&gt;%
+<span class="st">    </span><span class="kw">select</span>(Site, Date, vTagID, vSerial, PIT_Tag1, PIT_Tag2, TL_mm, FL_mm, Internal)</code></pre></div>
+</div>
+<div id="pearl-erdc" class="section level2">
+<h2><span class="header-section-number">3.8</span> Pearl (ERDC)</h2>
+<p><em>Note:</em> This one only had one PIT tag column, hence no <code>PIT_Tag2</code> in the <code>select</code> command.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">erdc_df &lt;-<span class="st"> </span>erdc_df %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(
+        <span class="dt">Date =</span> <span class="kw">as.Date</span>(<span class="st">`</span><span class="dt">Date</span><span class="st">`</span>),
+        <span class="dt">vTagID =</span> <span class="kw">as.integer</span>(vTagID),
+        <span class="dt">vSerial =</span> <span class="kw">as.character</span>(vSerial)
+    ) %&gt;%
+<span class="st">    </span><span class="kw">rename</span>(<span class="dt">PIT_Tag1 =</span> PIT_Tag) %&gt;%
+<span class="st">    </span><span class="kw">select</span>(Site, Date, vTagID, vSerial, PIT_Tag1, TL_mm, FL_mm)</code></pre></div>
+</div>
 </div>
 <div id="gathering-by-pit-and-combining" class="section level1">
 <h1><span class="header-section-number">4</span> Gathering by PIT and combining</h1>
-<p>The below function uses <code>gather</code> to gather <code>PIT_Tag1</code> and <code>PIT_Tag2</code> into a single <code>PIT_Tag</code> column, resulting in more rows but “tidier” data. This tidiness allows me to more easily combine the data frames into one and to match <code>PIT_Tag</code>s with <code>vTagID</code>s. The filter operation removes rows where <code>is.na(PIT_Tag)</code> and the associated <code>vTagID</code>–<code>Date</code> combination has already been represented in another row. I removed <code>PIT_name</code> because it is useless for downstream processes.</p>
+<div id="gather-function" class="section level2">
+<h2><span class="header-section-number">4.1</span> Gather function</h2>
+<p>The below function uses <code>gather</code> to gather <code>PIT_Tag1</code> and <code>PIT_Tag2</code> into a single <code>PIT_Tag</code> column, resulting in more rows but “tidier” data. This tidiness allows me to more easily combine the data frames into one and to match <code>PIT_Tag</code>s with <code>vTagID</code>s. The filter operation removes rows where <code>is.na(PIT_Tag)</code> and the associated <code>vTagID</code>–<code>Date</code> combination has already been represented in another row. I removed <code>PIT_name</code> because it is useless for downstream processes. I lastly filtered rows that didn’t have either a <code>PIT_Tag</code> or <code>vTagID</code> because they, too, are useless.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gatherByPIT &lt;-<span class="st"> </span>function(df){
     df %&gt;%
 <span class="st">        </span><span class="kw">gather</span>(PIT_name, PIT_Tag, <span class="kw">starts_with</span>(<span class="st">'PIT_Tag'</span>, <span class="dt">ignore.case =</span> <span class="ot">FALSE</span>)) %&gt;%
 <span class="st">        </span><span class="kw">filter</span>(PIT_name ==<span class="st"> 'PIT_Tag1'</span> |<span class="st"> </span>!<span class="kw">is.na</span>(PIT_Tag)) %&gt;%
-<span class="st">        </span><span class="kw">select</span>(-PIT_name)
+<span class="st">        </span><span class="kw">select</span>(-PIT_name) %&gt;%<span class="st"> </span>
+<span class="st">        </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(vTagID) |<span class="st"> </span>!<span class="kw">is.na</span>(PIT_Tag))
 }</code></pre></div>
-<p>Now we run the function on all data frames and combine them into one. Since I made the data frames exactly the same above, combining them now is quite simple. I also filtered rows that didn’t have either a <code>PIT_Tag</code> or <code>vTagID</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">allSites &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">list</span>(Apal, Suwa, Pearl, Pasc, Choc), gatherByPIT) %&gt;%<span class="st"> </span>
+</div>
+<div id="side-note-evalas.namex" class="section level2">
+<h2><span class="header-section-number">4.2</span> <em>Side note</em>: <code>eval(as.name(x))</code></h2>
+<p>The command <code>eval(as.name(x))</code> takes a character <code>x</code> and evaluates it as a named variable. Try the following code for an idea of what this does:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">duf &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="kw">seq</span>(<span class="dv">10</span>), <span class="dt">y =</span> <span class="kw">seq</span>(<span class="dv">11</span>, <span class="dv">20</span>))
+<span class="kw">eval</span>(<span class="kw">as.name</span>(<span class="st">'duf'</span>))
+
+foo &lt;-<span class="st"> </span>function(x){x **<span class="st"> </span><span class="dv">2</span>}
+<span class="kw">eval</span>(<span class="kw">as.name</span>(<span class="st">'foo'</span>))(<span class="dv">5</span>)</code></pre></div>
+</div>
+<div id="gathering-all-data-frames-and-combining" class="section level2">
+<h2><span class="header-section-number">4.3</span> Gathering all data frames and combining</h2>
+<p>Now we run the function on all data frames and combine them into one. Because I named all data frames with names ending in <code>'_df'</code>, I can filter for just data frames in the <code>ls</code> command using the <code>pattern</code> argument. On each of these character inputs, I use the <code>eval(as.name(x))</code> command discussed above. Since I made the data frames nearly exactly the same above, combining them now is quite simple.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">allSites &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">ls</span>(<span class="dt">pattern =</span> <span class="st">'_df'</span>), function(x) <span class="kw">eval</span>(<span class="kw">as.name</span>(x))) %&gt;%
+<span class="st">    </span><span class="kw">lapply</span>(., gatherByPIT) %&gt;%<span class="st"> </span>
 <span class="st">    </span>bind_rows
 allSites</code></pre></div>
-<pre><code>Source: local data frame [1,189 x 7]
-
+<pre><code># A tibble: 1,364 x 8
                  Site       Date vTagID vSerial TL_mm FL_mm        PIT_Tag
                 &lt;chr&gt;     &lt;date&gt;  &lt;dbl&gt;   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;          &lt;chr&gt;
-1  Apalachicola River 2010-10-24  46175      NA  1900  1770 3D9.1C2CCE537C
-2  Apalachicola River 2010-10-24  46226      NA  1530  1400 3D9.1C2CC9D9A1
-3  Apalachicola River 2010-10-25  46173      NA  1620  1520 3D9.1C2CCE53F6
-4  Apalachicola River 2010-10-26  46176      NA  2070  1880 3D9.1C2CBE685B
-5  Apalachicola River 2010-10-26  46180      NA  1770  1590 3D9.1BF20F8613
-6  Apalachicola River 2010-10-26  46227      NA  1490  1350 3D9.1C2CC94B71
-7  Apalachicola River 2010-10-29  46230      NA  1510  1390 3D9.1C2C4D83B9
-8  Apalachicola River 2010-10-30  46174      NA  1420  1250 3D9.1C2CC952A5
-9  Apalachicola River 2010-10-30  46234      NA  1510  1410 3D9.1C2CFD31E1
-10 Apalachicola River 2010-11-02  46179      NA  1500  1370 3D9.1C2CCC5B11
-..                ...        ...    ...     ...   ...   ...            ...</code></pre>
+1  Apalachicola River 2010-10-24  46175    &lt;NA&gt;  1900  1770 3D9.1C2CCE537C
+2  Apalachicola River 2010-10-24  46226    &lt;NA&gt;  1530  1400 3D9.1C2CC9D9A1
+3  Apalachicola River 2010-10-25  46173    &lt;NA&gt;  1620  1520 3D9.1C2CCE53F6
+4  Apalachicola River 2010-10-26  46176    &lt;NA&gt;  2070  1880 3D9.1C2CBE685B
+5  Apalachicola River 2010-10-26  46180    &lt;NA&gt;  1770  1590 3D9.1BF20F8613
+6  Apalachicola River 2010-10-26  46227    &lt;NA&gt;  1490  1350 3D9.1C2CC94B71
+7  Apalachicola River 2010-10-29  46230    &lt;NA&gt;  1510  1390 3D9.1C2C4D83B9
+8  Apalachicola River 2010-10-30  46174    &lt;NA&gt;  1420  1250 3D9.1C2CC952A5
+9  Apalachicola River 2010-10-30  46234    &lt;NA&gt;  1510  1410 3D9.1C2CFD31E1
+10 Apalachicola River 2010-11-02  46179    &lt;NA&gt;  1500  1370 3D9.1C2CCC5B11
+# ... with 1,354 more rows, and 1 more variables: Internal &lt;lgl&gt;</code></pre>
+</div>
+</div>
+<div id="cleaning-site-names" class="section level1">
+<h1><span class="header-section-number">5</span> Cleaning <code>Site</code> names</h1>
+<p>The original <code>Site</code> names were not standardized into “Systems” and “Subsystems”. Using a data frame derived from the file <code>'site_name_corrections.csv'</code> in the <code>in_csv</code> folder (provided to me by Bill Pine), I assigned standardized versions of each <code>Site</code> name. I placed the <code>System</code> and <code>Subsystem</code> columns where <code>Site</code> was.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">name_df &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">'./csv_in/site_name_corrections.csv'</span>, <span class="dt">col_types =</span> <span class="st">'ccc'</span>)
+get_sys &lt;-<span class="st"> </span>function(sites){
+    <span class="kw">sapply</span>(sites, function(x){name_df$System[name_df$Site ==<span class="st"> </span>x]})
+}
+get_sub &lt;-<span class="st"> </span>function(sites){
+    <span class="kw">sapply</span>(sites, function(x){name_df$Subsystem[name_df$Site ==<span class="st"> </span>x]})
+}
+allSites &lt;-<span class="st"> </span>allSites %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">System =</span> <span class="kw">get_sys</span>(Site), <span class="dt">Subsystem =</span> <span class="kw">get_sub</span>(Site)) %&gt;%
+<span class="st">    </span><span class="kw">select</span>(System, Subsystem, Date, vTagID, vSerial, TL_mm, FL_mm, PIT_Tag, Internal)</code></pre></div>
 </div>
 <div id="session-information" class="section level1">
-<h1><span class="header-section-number">5</span> Session information</h1>
+<h1><span class="header-section-number">6</span> Session information</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">session_info</span>()</code></pre></div>
 <pre><code>Session info --------------------------------------------------------------</code></pre>
 <pre><code> setting  value                       
@@ -326,32 +418,32 @@ allSites</code></pre></div>
  ui       RStudio (0.99.902)          
  language (EN)                        
  collate  en_US.UTF-8                 
- tz       America/New_York            
- date     2016-06-17                  </code></pre>
+ tz       America/Chicago             
+ date     2016-08-30                  </code></pre>
 <pre><code>Packages ------------------------------------------------------------------</code></pre>
 <pre><code> package    * version date       source        
  assertthat   0.1     2013-12-06 CRAN (R 3.3.0)
- DBI          0.4-1   2016-05-08 CRAN (R 3.3.0)
- devtools     1.11.1  2016-04-21 CRAN (R 3.3.0)
- digest       0.6.9   2016-01-08 CRAN (R 3.3.0)
- dplyr      * 0.4.3   2015-09-01 CRAN (R 3.3.0)
+ DBI          0.5     2016-08-11 CRAN (R 3.3.0)
+ devtools     1.12.0  2016-06-24 CRAN (R 3.3.0)
+ digest       0.6.10  2016-08-02 CRAN (R 3.3.0)
+ dplyr      * 0.5.0   2016-06-24 CRAN (R 3.3.0)
  evaluate     0.9     2016-04-29 CRAN (R 3.3.0)
  formatR      1.4     2016-05-09 CRAN (R 3.3.0)
  htmltools    0.3.5   2016-03-21 CRAN (R 3.3.0)
- knitr        1.13    2016-05-09 CRAN (R 3.3.0)
+ knitr        1.14    2016-08-13 CRAN (R 3.3.0)
  lazyeval     0.2.0   2016-06-12 CRAN (R 3.3.0)
  magrittr     1.5     2014-11-22 CRAN (R 3.3.0)
  memoise      1.0.0   2016-01-29 CRAN (R 3.3.0)
- R6           2.1.2   2016-01-26 CRAN (R 3.3.0)
- Rcpp         0.12.5  2016-05-14 CRAN (R 3.3.0)
- readr      * 0.2.2   2015-10-22 CRAN (R 3.3.0)
+ R6           2.1.3   2016-08-19 CRAN (R 3.3.0)
+ Rcpp         0.12.6  2016-07-19 CRAN (R 3.3.0)
+ readr      * 1.0.0   2016-08-03 CRAN (R 3.3.0)
  readxl     * 0.1.1   2016-03-28 CRAN (R 3.3.0)
- rmarkdown    0.9.6   2016-05-01 CRAN (R 3.3.0)
+ rmarkdown    1.0     2016-07-08 CRAN (R 3.3.0)
  stringi      1.1.1   2016-05-27 CRAN (R 3.3.0)
- stringr    * 1.0.0   2015-04-30 CRAN (R 3.3.0)
- tibble       1.0     2016-03-23 CRAN (R 3.3.0)
- tidyr      * 0.5.0   2016-06-12 CRAN (R 3.3.0)
- withr        1.0.1   2016-02-04 CRAN (R 3.3.0)
+ stringr    * 1.1.0   2016-08-19 CRAN (R 3.3.0)
+ tibble       1.1     2016-07-04 CRAN (R 3.3.0)
+ tidyr      * 0.6.0   2016-08-12 CRAN (R 3.3.0)
+ withr        1.0.2   2016-06-20 CRAN (R 3.3.0)
  yaml         2.1.13  2014-06-12 CRAN (R 3.3.0)</code></pre>
 <!---
 rmarkdown::render('compiling.Rmd', output_file = 'compiling.html')

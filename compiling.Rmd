@@ -42,8 +42,8 @@ Each data frame was unique in its column names and overall setup. Below are some
 for the output data frames:
 
 1. Contain as many of the following columns as possible: `Site`, `Date`, `vTagID`,
-   `vSerial`, `PIT_Tag1`, `PIT_Tag2`, `TL_mm`, and `FL_mm` (equivalent columns  
-   were converted using `rename` and selected for output using `select`) 
+   `vSerial`, `PIT_Tag1`, `PIT_Tag2`, `TL_mm`, and `FL_mm` (equivalent columns were 
+   converted using `rename` and selected for output using `select`) 
 2. Convert the `FL` and `TL` columns from centimeters to millimeters
 3. Standardize `Site` names and `Date` formats
 
@@ -133,6 +133,13 @@ quite simple.
 ```
 
 
+# Cleaning `Site` names
+The original `Site` names were not standardized into "Systems" and "Subsystems". Using 
+a data frame derived from the file `'site_name_corrections.csv'` in the `in_csv` folder
+(provided to me by Bill Pine), I assigned standardized versions of each `Site` name.
+I placed the `System` and `Subsystem` columns where `Site` was.
+```{r cleanSites}
+```
 
 
 
