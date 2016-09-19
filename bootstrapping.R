@@ -21,48 +21,15 @@ CPUEdf <- read_excel("./from_Bill/brett_example.xlsx",1) %>%
 
 
 
-## @knitr bootstrappingFuns
-stratBootstrap <- function(df, m, group) {
-    
-    # Inner function to sample row numbers from an input vector of sample sizes 
-    # for each group
-    stratSample <- function(group_n){
-        ends <- cumsum(group_n)
-        starts <- c(1, ends[-length(ends)] - 1)
-        bootRows <- unlist(lapply(seq(length(ends)), function(i){
-            sample(seq(starts[i], ends[i]), replace = TRUE)}))
-        return(bootRows)
-    }
-    
-    df <- df %>% arrange_(group)
-    
-    n <- nrow(df)
-    group_n <- (df %>% 
-                    group_by_(group) %>% 
-                    summarize(n = n()))[['n']]
-    
-    attr(df, "indices") <- replicate(m, stratSample(group_n) - 1, 
-                                     simplify = FALSE)
-    attr(df, "drop") <- TRUE
-    attr(df, "group_sizes") <- rep(n, m)
-    attr(df, "biggest_group_size") <- n
-    attr(df, "labels") <- data.frame(replicate = 1:m)
-    attr(df, "vars") <- list(quote(replicate))
-    class(df) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
-    
-    return(df)
-}
-
-
-
 
 ## @knitr bootstrapping
 set.seed(9721)
 CPUEboot <- CPUEdf %>%
-    stratBootstrap(1e3, group = 'Year') %>%
+    group_by(Year) %>% 
+    bootstrap(100, by_group = TRUE) %>% 
     do(summarize(group_by(., Year), CPUE = mean(CPUE))) %>% 
-    # To strip attributes:
-    as.data.frame %>% as.tbl
+    ungroup %>% 
+    select(-replicate)
 
 # Summary table
 CPUEbootSumm <- CPUEboot %>%
@@ -72,7 +39,6 @@ CPUEbootSumm <- CPUEboot %>%
               high = quantile(CPUE, probs = 0.975))
 
 CPUEbootSumm
-
 
 
 

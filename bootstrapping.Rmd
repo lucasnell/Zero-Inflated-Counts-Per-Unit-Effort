@@ -15,6 +15,7 @@ output:
 mainfont: Helvetica
 geometry: margin=1in
 fontsize: 10pt
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -40,22 +41,27 @@ Read, clean, and add necessary columns to the table in `brett_example.xlsx`.
 # Bootstrap resampling
 
 For seamless bootstrapping with `dplyr`, the package `broom` provides the function
-`boostrap`. However, this function samples from all rows regardless of grouping. I've
-hacked the version of the function found [here](
-https://cran.r-project.org/web/packages/broom/vignettes/bootstrapping.html) to sample 
-within a given grouping as such: If, for example, you group by a variable called `type` 
-and in the original sample, `type`s 1, 2, and 3  have sample sizes of 10, 20, and 30,
-respectively. This function would randomly sample  exactly 10 items from the original 
-dataset (with replacement) that are of `type` 1, 20 of `type` 2, and 30 of `type` 3.
+`boostrap`.
 
-```{r bootstrappingFuns}
-```
+I've grouped by `Year` to sample the same number of samples per year for each 
+bootstrap resample as there were in the original sample.
 
+If we represent each year's sampling as...
+$$
+n_1, n_2, n_3, \hspace{0.25em} ... \hspace{0.25em}, n_k
+$$
 
+where
 
+$$
+n_{total} = \sum_{i=1}^{k}{n_i}
+$$
 
-Now for the actual bootstrapping. We'll do 1,000 simulations and calculate the 95% CI
-via the "percentile" method.
+Then what we'll do below will maintain each of 
+$n_1, \hspace{0.25em} ... \hspace{0.25em}, n_k$ 
+(rather than just $n_{total}$) through all resamples.
+
+We'll do 1,000 simulations and calculate the 95% CI via the "percentile" method.
 
 ```{r bootstrapping}
 ```
