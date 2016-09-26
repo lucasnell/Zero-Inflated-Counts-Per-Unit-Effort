@@ -123,7 +123,7 @@ endeavor.
 # Session information
 
 
-```{r session_info, include = TRUE, echo = TRUE, results = 'markup'}
+```{r session_info, include = TRUE, echo = FALSE, results = 'markup'}
 devtools::session_info()
 ```
 

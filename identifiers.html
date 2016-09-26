@@ -184,8 +184,9 @@ $(document).ready(function () {
 </div>
 <div id="required-objects" class="section level2">
 <h2><span class="header-section-number">1.2</span> Required objects</h2>
-<p>We need the objects created in the compiling stage.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;compiling.R&quot;</span>)</code></pre></div>
+<p>We need the <code>cleanSites</code> data frame created in the compiling stage. The <code>rm</code> command removes all other objects created in <code>compiling.R</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;compiling.R&quot;</span>)
+<span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">ls</span>(<span class="dt">pattern =</span> <span class="st">'_df|gather'</span>))</code></pre></div>
 </div>
 </div>
 <div id="matching-vtagids-and-pit_tags" class="section level1">
@@ -197,7 +198,7 @@ $(document).ready(function () {
 <div id="pit_tags-per-vtagid" class="section level3">
 <h3><span class="header-section-number">2.1.1</span> <code>PIT_Tag</code>s per <code>vTagID</code></h3>
 <p>Table of the number of unique, non-<code>NA</code> <code>PIT_Tag</code>s per <code>vTagID</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">unique_PITs_Tab &lt;-<span class="st"> </span>allSites %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">unique_PITs_Tab &lt;-<span class="st"> </span>cleanSites %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(vTagID), !<span class="kw">is.na</span>(PIT_Tag)) %&gt;%
 <span class="st">    </span><span class="kw">group_by</span>(vTagID) %&gt;%
 <span class="st">    </span><span class="kw">summarize</span>(<span class="dt">uniquePITs =</span> <span class="kw">length</span>(<span class="kw">unique</span>(PIT_Tag))) %&gt;%
@@ -205,13 +206,13 @@ $(document).ready(function () {
 <span class="st">    </span>table
 unique_PITs_Tab</code></pre></div>
 <pre><code>.
-  1   2   3 
-395 130   5 </code></pre>
+  1   2   3   4 
+553 148   8   1 </code></pre>
 </div>
 <div id="vtagids-per-pit_tag" class="section level3">
 <h3><span class="header-section-number">2.1.2</span> <code>vTagID</code>s per <code>PIT_Tag</code></h3>
 <p>Table of the number of unique, non-<code>NA</code> <code>vTagID</code>s per <code>PIT_Tag</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">unique_vTags_Tab &lt;-<span class="st"> </span>allSites %&gt;%
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">unique_vTags_Tab &lt;-<span class="st"> </span>cleanSites %&gt;%
 <span class="st">    </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(vTagID), !<span class="kw">is.na</span>(PIT_Tag)) %&gt;%
 <span class="st">    </span><span class="kw">group_by</span>(PIT_Tag) %&gt;%
 <span class="st">    </span><span class="kw">summarize</span>(<span class="dt">uniquevTagIDs =</span> <span class="kw">length</span>(<span class="kw">unique</span>(vTagID))) %&gt;%
@@ -220,7 +221,7 @@ unique_PITs_Tab</code></pre></div>
 unique_vTags_Tab</code></pre></div>
 <pre><code>.
   1   2   3 
-641  10   3 </code></pre>
+834  17   3 </code></pre>
 </div>
 </div>
 <div id="maximum-matches" class="section level2">
@@ -232,26 +233,26 @@ unique_vTags_Tab</code></pre></div>
 <div id="pit_tagvtagid-pairs" class="section level2">
 <h2><span class="header-section-number">2.3</span> <code>PIT_Tag</code>–<code>vTagID</code> pairs</h2>
 <p>I needed to create a data frame of all unique <code>vTagID</code>–<code>PIT_Tag</code> pairs, so that this data frame doesn’t have to be created for every single lookup (which would be a real time-waster). Because some <code>PIT_Tag</code>s match with multiple <code>vTagID</code>s, I will expand this data frame later to account for this.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vTagID_PIT &lt;-<span class="st"> </span>allSites %&gt;%
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vTagID_PIT &lt;-<span class="st"> </span>cleanSites %&gt;%
 <span class="st">    </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(vTagID), !<span class="kw">is.na</span>(PIT_Tag)) %&gt;%
 <span class="st">    </span><span class="kw">distinct</span>(vTagID, PIT_Tag) %&gt;%
 <span class="st">    </span><span class="kw">select</span>(vTagID, PIT_Tag)</code></pre></div>
 </div>
 <div id="lookup-functions" class="section level2">
 <h2><span class="header-section-number">2.4</span> Lookup functions</h2>
-<p>I next created functions to look up all equivalent <code>PIT_Tags</code> for a given <code>vTagID</code>, and vice versa, from the <code>vTagID_PIT</code> data frame. I will later be adding rows to the <code>vTagID_PIT</code> reference data frame, and even though I am creating these functions now, they will use the updated version of <code>vTagID_PIT</code> if they’re called after the changes are made to the data frame.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vTagID_to_PITs &lt;-<span class="st"> </span>function(in_vTagID){
-    out_PIT &lt;-<span class="st"> </span>(vTagID_PIT %&gt;%
-<span class="st">                    </span><span class="kw">filter</span>(vTagID ==<span class="st"> </span><span class="kw">as.numeric</span>(in_vTagID)) %&gt;%
-<span class="st">                    </span><span class="kw">select</span>(PIT_Tag))[[<span class="dv">1</span>]]
-    <span class="kw">return</span>(out_PIT)
+<p>I next created functions to look up all equivalent <code>PIT_Tags</code> for a given <code>vTagID</code>, and vice versa, from the <code>vTagID_PIT</code> data frame. I will later be adding rows to the <code>vTagID_PIT</code> reference data frame, and even though I am creating these functions now, they will use the updated version of <code>vTagID_PIT</code> if they’re called after the changes are made to the data frame. Each of these functions uses an inner function that works for a single input <code>vTagID</code>/<code>PIT_Tag</code>, then uses the <code>sapply</code> function to apply that inner function to a vector.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vTagID_to_PITs &lt;-<span class="st"> </span>function(in_vTagIDs){
+    one_vTagID &lt;-<span class="st"> </span>function(in_vTagID){
+        <span class="kw">as.character</span>(<span class="kw">filter</span>(vTagID_PIT, vTagID ==<span class="st"> </span><span class="kw">as.integer</span>(in_vTagID))$PIT_Tag)
+    }
+    <span class="kw">return</span>(<span class="kw">sapply</span>(in_vTagIDs, one_vTagID, <span class="dt">USE.NAMES =</span> <span class="ot">FALSE</span>))
 }
 
-PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
-    out_vTagID &lt;-<span class="st"> </span>(vTagID_PIT %&gt;%
-<span class="st">                       </span><span class="kw">filter</span>(PIT_Tag ==<span class="st"> </span><span class="kw">as.character</span>(in_PIT)) %&gt;%
-<span class="st">                       </span><span class="kw">select</span>(vTagID))[[<span class="dv">1</span>]]
-    <span class="kw">return</span>(out_vTagID)
+PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PITs){
+    one_PIT &lt;-<span class="st"> </span>function(in_PIT){
+        <span class="kw">as.integer</span>(<span class="kw">filter</span>(vTagID_PIT, PIT_Tag ==<span class="st"> </span><span class="kw">as.character</span>(in_PIT))$vTagID)
+    }
+    <span class="kw">return</span>(<span class="kw">sapply</span>(in_PITs, one_PIT, <span class="dt">USE.NAMES =</span> <span class="ot">FALSE</span>))
 }</code></pre></div>
 </div>
 </div>
@@ -262,10 +263,10 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
 <div id="newest-vtagid-lookup" class="section level2">
 <h2><span class="header-section-number">3.1</span> Newest <code>vTagID</code> lookup</h2>
 <p>The below function will return the most recent <code>vTagID</code> from an input vector of <code>vTagID</code>s. <em>Note</em>: This function does not retrieve the newest <code>vTagID</code> for a given <em>individual</em>, just from the provided <code>vTagID</code>s.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">findNewest_vTagID &lt;-<span class="st"> </span>function(focal_vTagIDs, <span class="dt">refDF =</span> allSites){
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">findNewest_vTagID &lt;-<span class="st"> </span>function(focal_vTagIDs, <span class="dt">refDF =</span> cleanSites){
     new_vTagID &lt;-<span class="st"> </span>(refDF %&gt;%
 <span class="st">                       </span><span class="kw">filter</span>(vTagID %in%<span class="st"> </span>
-<span class="st">                                  </span><span class="kw">as.numeric</span>(focal_vTagIDs[!<span class="kw">is.na</span>(focal_vTagIDs)])) %&gt;%
+<span class="st">                                  </span><span class="kw">as.integer</span>(focal_vTagIDs[!<span class="kw">is.na</span>(focal_vTagIDs)])) %&gt;%
 <span class="st">                       </span><span class="kw">arrange</span>(<span class="kw">desc</span>(Date)))$vTagID[<span class="dv">1</span>]
     <span class="kw">return</span>(new_vTagID)
 }</code></pre></div>
@@ -283,37 +284,37 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
              <span class="dt">fill =</span> <span class="st">'right'</span>) %&gt;%
 <span class="st">    </span><span class="co"># Remove rows where only one vTagID matches with the PIT_Tag</span>
 <span class="st">    </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(vTagID_2)) %&gt;%
-<span class="st">    </span><span class="co"># Convert vTagID columns back to numeric for compatibility with `allSites` data frame</span>
-<span class="st">    </span><span class="kw">mutate_each</span>(<span class="kw">funs</span>(as.numeric), <span class="kw">starts_with</span>(<span class="st">'vTagID'</span>)) %&gt;%
+<span class="st">    </span><span class="co"># Convert vTagID columns back to integer for compatibility with `cleanSites` data frame</span>
+<span class="st">    </span><span class="kw">mutate_each</span>(<span class="kw">funs</span>(as.integer), <span class="kw">starts_with</span>(<span class="st">'vTagID'</span>)) %&gt;%
 <span class="st">    </span><span class="co"># Using 'standard evaluation' by using `select_`, which allows use of `maxUniques`</span>
 <span class="st">    </span><span class="kw">select_</span>(<span class="dt">.dots =</span> <span class="kw">c</span>(<span class="kw">paste0</span>(<span class="st">'vTagID_'</span>, <span class="kw">seq</span>(maxUniques)), <span class="st">'PIT_Tag'</span>))</code></pre></div>
 <p>For easier lookup of whether a given <code>vTagID</code> is part of an equivalent pair/trio, and, if so, what the newest <code>vTagID</code> is for that individual, the final lookup data frame is a “longer” version of the one above. In this data frame, every <code>vTagID</code> that is part of an equivalent pair/trio is present in the first column, <code>&quot;input&quot;</code>. The newest <code>vTagID</code> for that individual is in the <code>&quot;newest&quot;</code> column.</p>
 <p>The code chunk below does the following:</p>
 <ol style="list-style-type: decimal">
-<li>Create a data frame, with the following named columns:
+<li>Create a data frame using <code>data_frame</code> from package <code>tibble</code>, which is faster and automatically adds <code>tbl_df</code> class to output.</li>
+<li>Add the following named columns to the data frame:
 <ol style="list-style-type: lower-alpha">
 <li><code>&quot;input&quot;</code>: The first 3 columns of <code>equiv_vTagID_PIT</code> turned into a single vector.</li>
 <li><code>&quot;newest&quot;</code>: <code>apply</code> the <code>findNewest_vTagID</code> function across rows of the <code>equiv_vTagID_PIT</code> data frame, but only including the first 3 columns (the ones with <code>vTagID</code>s). This returns a vector of the newest <code>vTagID</code>s per pair/trio. I also used <code>repeat</code> on <code>newest_vTagIDs</code> with the option <code>each = 3</code>, to make this vector the same length as that in the <code>&quot;input&quot;</code> entry and to make them refer to the same individual at all locations across both vectors.</li>
 </ol></li>
-<li>Combine these vectors into a single data frame (<code>equiv_vTagID</code>), and remove any rows where <code>input</code> is not present.</li>
+<li>Remove any rows where <code>input</code> is not present.</li>
 </ol>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">equiv_vTagID &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">input =</span> <span class="kw">as.vector</span>(<span class="kw">t</span>(equiv_vTagID_PIT[,<span class="dv">1</span>:maxUniques])),
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">equiv_vTagID &lt;-<span class="st"> </span><span class="kw">data_frame</span>(<span class="dt">input =</span> <span class="kw">as.vector</span>(<span class="kw">t</span>(equiv_vTagID_PIT[,<span class="dv">1</span>:maxUniques])),
                            <span class="dt">newest =</span> <span class="kw">rep</span>(<span class="kw">apply</span>(equiv_vTagID_PIT[,<span class="dv">1</span>:maxUniques], <span class="dv">1</span>, 
                                               findNewest_vTagID),
                                         <span class="dt">each =</span> maxUniques)) %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(input)) %&gt;%
-<span class="st">    </span>as.tbl</code></pre></div>
+<span class="st">    </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(input))</code></pre></div>
 </div>
 <div id="retrieving-full-information-for-captures-including-equivalent-vtagids" class="section level2">
 <h2><span class="header-section-number">3.3</span> Retrieving full information for captures including equivalent <code>vTagID</code>s</h2>
 <p>To check on equivalent <code>vTagID</code>s, below is how to create a csv file of each capture containing an equivalent <code>vTagID</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">equivRows &lt;-
-<span class="st">    </span>allSites %&gt;%
+<span class="st">    </span>cleanSites %&gt;%
 <span class="st">    </span><span class="kw">filter</span>(vTagID %in%<span class="st"> </span>equiv_vTagID$input, 
            PIT_Tag %in%<span class="st"> </span>equiv_vTagID_PIT$PIT_Tag) %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="kw">arrange</span>(Site, PIT_Tag, vTagID)
+<span class="st">    </span><span class="kw">arrange</span>(System, Subsystem, PIT_Tag, vTagID)
 
-<span class="kw">write_csv</span>(equivRows, <span class="st">'../csv_out/equivalent_vTagIDs.csv'</span>)</code></pre></div>
+<span class="kw">write_csv</span>(equivRows, <span class="st">'./csv_out/equivalent_vTagIDs.csv'</span>)</code></pre></div>
 </div>
 <div id="adjusting-vtagidpit_tag-lookup-data-frame-for-dropped-vtags" class="section level2">
 <h2><span class="header-section-number">3.4</span> Adjusting <code>vTagID</code>–<code>PIT_Tag</code> lookup data frame for dropped vTags</h2>
@@ -342,8 +343,8 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
 <span class="st">    </span><span class="kw">separate</span>(vTagIDs, <span class="kw">paste0</span>(<span class="st">'vTagIDs_'</span>, <span class="kw">seq</span>(<span class="dv">10</span>)), <span class="dt">sep =</span> <span class="st">':'</span>, 
              <span class="dt">fill =</span> <span class="st">'right'</span>) %&gt;%
 <span class="st">    </span><span class="kw">gather</span>(vTagID_name, vTagID, -PIT_Tag, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>) %&gt;%
-<span class="st">    </span><span class="co"># Make vTagID numeric for compatibility</span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">vTagID =</span> <span class="kw">as.numeric</span>(vTagID)) %&gt;%
+<span class="st">    </span><span class="co"># Make vTagID integer for compatibility</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">vTagID =</span> <span class="kw">as.integer</span>(vTagID)) %&gt;%
 <span class="st">    </span><span class="kw">select</span>(-vTagID_name) %&gt;%
 <span class="st">    </span><span class="co"># Filter for unique combinations</span>
 <span class="st">    </span><span class="kw">distinct</span>(vTagID, PIT_Tag)</code></pre></div>
@@ -361,18 +362,21 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
 <span class="st">    </span><span class="kw">summarize</span>(<span class="dt">len =</span> <span class="kw">n</span>()) %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">select</span>(len) %&gt;%<span class="st"> </span>
 <span class="st">    </span>max</code></pre></div>
-<p>I next made the data frame of <code>PIT_Tag</code>s and <code>vTagID</code>s into a data frame of all <code>PIT_Tag</code>s with a <code>vTagID</code>. If more than one <code>vTagID</code> is associated with a given <code>PIT_Tag</code>, I used the newest <code>vTagID</code>. I lastly added a <code>&quot;River&quot;</code> column by referencing the <code>allSites</code> data frame.</p>
+<p>I next made the data frame of <code>PIT_Tag</code>s and <code>vTagID</code>s into a data frame of all <code>PIT_Tag</code>s with a <code>vTagID</code>. If more than one <code>vTagID</code> is associated with a given <code>PIT_Tag</code>, I used the newest <code>vTagID</code>. I lastly added a <code>&quot;River&quot;</code> column by referencing the <code>cleanSites</code> data frame.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">PITs_w_vTag &lt;-<span class="st"> </span>vTagID_PIT %&gt;%
 <span class="st">    </span><span class="kw">group_by</span>(PIT_Tag) %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">summarize</span>(<span class="dt">vTagID_new =</span> <span class="kw">findNewest_vTagID</span>(vTagID)) %&gt;%
 <span class="st">    </span><span class="kw">rename</span>(<span class="dt">vTagID =</span> vTagID_new) %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(
-        <span class="dt">River =</span> <span class="kw">sapply</span>(PIT_Tag, function(x){
-            <span class="kw">tail</span>(allSites$Site[allSites$PIT_Tag ==<span class="st"> </span>x] %&gt;%<span class="st"> </span>na.omit, <span class="dv">1</span>)}, 
+        <span class="dt">System =</span> <span class="kw">sapply</span>(PIT_Tag, function(x){
+            <span class="kw">tail</span>(cleanSites$System[cleanSites$PIT_Tag ==<span class="st"> </span>x] %&gt;%<span class="st"> </span>na.omit, <span class="dv">1</span>)}, 
+            <span class="dt">USE.NAMES =</span> <span class="ot">FALSE</span>),
+        <span class="dt">Subsystem =</span> <span class="kw">sapply</span>(PIT_Tag, function(x){
+            <span class="kw">tail</span>(cleanSites$Subsystem[cleanSites$PIT_Tag ==<span class="st"> </span>x] %&gt;%<span class="st"> </span>na.omit, <span class="dv">1</span>)}, 
             <span class="dt">USE.NAMES =</span> <span class="ot">FALSE</span>)
     ) %&gt;%
-<span class="st">    </span><span class="kw">arrange</span>(River, PIT_Tag) %&gt;%
-<span class="st">    </span><span class="kw">select</span>(River, PIT_Tag, vTagID)</code></pre></div>
+<span class="st">    </span><span class="kw">arrange</span>(System, Subsystem, PIT_Tag) %&gt;%
+<span class="st">    </span><span class="kw">select</span>(System, Subsystem, PIT_Tag, vTagID)</code></pre></div>
 <p>Now I can save this as a csv file.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write_csv</span>(PITs_w_vTag, <span class="st">'./csv_out/PITs_w_vTag.csv'</span>)</code></pre></div>
 </div>
@@ -390,7 +394,7 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
 <div id="making-master-data-frame-only-use-newest-vtagids" class="section level2">
 <h2><span class="header-section-number">6.1</span> Making master data frame only use newest <code>vTagID</code>s</h2>
 <p>I now replace all instances in the master observation data frame of dropped <code>vTagID</code>s with the newest <code>vTagID</code> that represents the same individual.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">allSites_newIDs &lt;-<span class="st"> </span>allSites %&gt;%
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cleanSites_newIDs &lt;-<span class="st"> </span>cleanSites %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(
         <span class="dt">vTagID =</span> <span class="kw">sapply</span>(vTagID, 
                         function(x){
@@ -402,25 +406,24 @@ PIT_to_vTagID &lt;-<span class="st"> </span>function(in_PIT){
 </div>
 <div id="making-master-data-frame-contain-only-valid-vtagids" class="section level2">
 <h2><span class="header-section-number">6.2</span> Making master data frame contain only valid <code>vTagID</code>s</h2>
-<p>By cross-referencing with the data frame of known <code>vTagID</code>s for <code>PIT_Tag</code>s, I filled in some rows that don’t have <code>vTagID</code>s, but do have <code>PIT_Tag</code>s. I combined these rows with those from <code>allSites</code> that already have valid (i.e., non-<code>NA</code>) <code>vTagID</code>s to create a data frame of all observations with known identifiers.</p>
-<p>In creating the <code>valid_PIT</code> data frame, I’m wrapping the <code>PIT_to_vTagID</code> function inside the <code>Vectorize</code> function so that the new “vectorized” function uses and returns a vector. I could have also used <code>sapply</code> as I did above, but <code>Vectorize</code> was simpler in this case, since I’d already created the base function. For more information on vectorization, see <a href="http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html">here</a>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">valid_vTagID &lt;-<span class="st"> </span>allSites_newIDs %&gt;%<span class="st"> </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(vTagID))
-
-valid_PIT &lt;-<span class="st"> </span>allSites_newIDs %&gt;%
-<span class="st">    </span><span class="kw">filter</span>(<span class="kw">is.na</span>(vTagID),
-           PIT_Tag %in%<span class="st"> </span>vTagID_PIT$PIT_Tag) %&gt;%
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">vTagID =</span> <span class="kw">Vectorize</span>(PIT_to_vTagID, <span class="st">'in_PIT'</span>, <span class="dt">USE.NAMES =</span> <span class="ot">FALSE</span>)(PIT_Tag))
-
-masterCaps &lt;-<span class="st"> </span><span class="kw">bind_rows</span>(valid_vTagID, valid_PIT)
-
-<span class="kw">rm</span>(valid_vTagID, valid_PIT)</code></pre></div>
+<p>By cross-referencing with the data frame of known <code>vTagID</code>s for <code>PIT_Tag</code>s, I filled in some rows that don’t have <code>vTagID</code>s, but do have <code>PIT_Tag</code>s. I combined these rows with those from <code>cleanSites</code> that already have valid (i.e., non-<code>NA</code>) <code>vTagID</code>s to create a data frame of all observations with known identifiers.</p>
+<p>To avoid creating temporary objects, both sets of rows were created on the fly as data frames within a list.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">masterCaps &lt;-<span class="st"> </span><span class="kw">list</span>(
+    <span class="co"># valid vTagIDs:</span>
+    cleanSites_newIDs %&gt;%<span class="st"> </span><span class="kw">filter</span>(!<span class="kw">is.na</span>(vTagID)),
+    <span class="co"># NA vTagIDs, but valid PITs:</span>
+    cleanSites_newIDs %&gt;%
+<span class="st">        </span><span class="kw">filter</span>(<span class="kw">is.na</span>(vTagID),
+               PIT_Tag %in%<span class="st"> </span>vTagID_PIT$PIT_Tag) %&gt;%
+<span class="st">        </span><span class="kw">mutate</span>(<span class="dt">vTagID =</span> <span class="kw">PIT_to_vTagID</span>(PIT_Tag))
+    ) %&gt;%<span class="st"> </span>
+<span class="st">    </span>bind_rows</code></pre></div>
 <p>Now I can save this as a csv file.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write_csv</span>(masterCaps, <span class="st">'./csv_out/masterCaps.csv'</span>)</code></pre></div>
 </div>
 </div>
 <div id="session-information" class="section level1">
 <h1><span class="header-section-number">7</span> Session information</h1>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">session_info</span>()</code></pre></div>
 <pre><code>Session info --------------------------------------------------------------</code></pre>
 <pre><code> setting  value                       
  version  R version 3.3.0 (2016-05-03)
@@ -428,32 +431,32 @@ masterCaps &lt;-<span class="st"> </span><span class="kw">bind_rows</span>(valid
  ui       RStudio (0.99.902)          
  language (EN)                        
  collate  en_US.UTF-8                 
- tz       America/New_York            
- date     2016-06-17                  </code></pre>
+ tz       America/Chicago             
+ date     2016-09-26                  </code></pre>
 <pre><code>Packages ------------------------------------------------------------------</code></pre>
 <pre><code> package    * version date       source        
  assertthat   0.1     2013-12-06 CRAN (R 3.3.0)
- DBI          0.4-1   2016-05-08 CRAN (R 3.3.0)
- devtools     1.11.1  2016-04-21 CRAN (R 3.3.0)
- digest       0.6.9   2016-01-08 CRAN (R 3.3.0)
- dplyr      * 0.4.3   2015-09-01 CRAN (R 3.3.0)
+ DBI          0.5-1   2016-09-10 CRAN (R 3.3.0)
+ devtools     1.12.0  2016-06-24 CRAN (R 3.3.0)
+ digest       0.6.10  2016-08-02 CRAN (R 3.3.0)
+ dplyr      * 0.5.0   2016-06-24 CRAN (R 3.3.0)
  evaluate     0.9     2016-04-29 CRAN (R 3.3.0)
  formatR      1.4     2016-05-09 CRAN (R 3.3.0)
  htmltools    0.3.5   2016-03-21 CRAN (R 3.3.0)
- knitr        1.13    2016-05-09 CRAN (R 3.3.0)
+ knitr        1.14    2016-08-13 CRAN (R 3.3.0)
  lazyeval     0.2.0   2016-06-12 CRAN (R 3.3.0)
  magrittr     1.5     2014-11-22 CRAN (R 3.3.0)
  memoise      1.0.0   2016-01-29 CRAN (R 3.3.0)
- R6           2.1.2   2016-01-26 CRAN (R 3.3.0)
- Rcpp         0.12.5  2016-05-14 CRAN (R 3.3.0)
- readr      * 0.2.2   2015-10-22 CRAN (R 3.3.0)
+ R6           2.1.3   2016-08-19 CRAN (R 3.3.0)
+ Rcpp         0.12.7  2016-09-05 CRAN (R 3.3.0)
+ readr      * 1.0.0   2016-08-03 CRAN (R 3.3.0)
  readxl     * 0.1.1   2016-03-28 CRAN (R 3.3.0)
- rmarkdown    0.9.6   2016-05-01 CRAN (R 3.3.0)
+ rmarkdown    1.0     2016-07-08 CRAN (R 3.3.0)
  stringi      1.1.1   2016-05-27 CRAN (R 3.3.0)
- stringr    * 1.0.0   2015-04-30 CRAN (R 3.3.0)
- tibble       1.0     2016-03-23 CRAN (R 3.3.0)
- tidyr      * 0.5.0   2016-06-12 CRAN (R 3.3.0)
- withr        1.0.1   2016-02-04 CRAN (R 3.3.0)
+ stringr    * 1.1.0   2016-08-19 CRAN (R 3.3.0)
+ tibble       1.2     2016-08-26 CRAN (R 3.3.0)
+ tidyr      * 0.6.0   2016-08-12 CRAN (R 3.3.0)
+ withr        1.0.2   2016-06-20 CRAN (R 3.3.0)
  yaml         2.1.13  2014-06-12 CRAN (R 3.3.0)</code></pre>
 <!---
 rmarkdown::render('identifiers.Rmd', output_file = 'identifiers.html')

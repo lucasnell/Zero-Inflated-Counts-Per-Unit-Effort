@@ -191,8 +191,9 @@ get_sys <- function(sites){
 get_sub <- function(sites){
     sapply(sites, function(x){name_df$Subsystem[name_df$Site == x]})
 }
-allSites <- allSites %>% 
-    mutate(System = get_sys(Site), Subsystem = get_sub(Site)) %>%
+cleanSites <- allSites %>% 
+    mutate(System = get_sys(Site), Subsystem = get_sub(Site), 
+           vTagID = as.integer(vTagID)) %>% 
     select(System, Subsystem, Date, vTagID, vSerial, TL_mm, FL_mm, PIT_Tag, Internal)
 
 

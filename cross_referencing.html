@@ -189,9 +189,9 @@ $(document).ready(function () {
 <div id="required-objects" class="section level2">
 <h2><span class="header-section-number">1.2</span> Required objects</h2>
 <p>We need some of the objects created in the <code>identifiers</code> stage. For <code>masterCaps</code>, I explicitly specified the column types using <code>col_types = 'cDiiddc'</code> because by default it was making the <code>TL_mm</code> column an integer, rather than double like the original data frame.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">masterCaps &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">'./csv_out/masterCaps.csv'</span>, <span class="dt">col_types =</span> <span class="st">'cDiiddc'</span>)
-dropped_vTagIDs &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">'./csv_out/dropped_vTagIDs.csv'</span>)
-PITs_w_vTag &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">'./csv_out/PITs_w_vTag.csv'</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">masterCaps &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">'./csv_out/masterCaps.csv'</span>, <span class="dt">col_types =</span> <span class="st">'ccDiiddcl'</span>)
+dropped_vTagIDs &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">'./csv_out/dropped_vTagIDs.csv'</span>, <span class="dt">col_types =</span> <span class="st">'ii'</span>)
+PITs_w_vTag &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">'./csv_out/PITs_w_vTag.csv'</span>, <span class="dt">col_types =</span> <span class="st">'ccci'</span>)</code></pre></div>
 </div>
 <div id="lookup-functions" class="section level2 tabset">
 <h2><span class="header-section-number">1.3</span> Lookup functions</h2>
@@ -295,19 +295,97 @@ Eglin_byYear &lt;-<span class="st"> </span>Eglin %&gt;%<span class="st"> </span>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Eglin_byYear %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">filter</span>(Year_vTagID %in%<span class="st"> </span>masterCaps_byYear$Year_vTagID) %&gt;%
 <span class="st">    </span>as.data.frame</code></pre></div>
-<pre><code>  Year vTagID total Year_vTagID
-1 2010  46441     1  2010_46441</code></pre>
+<pre><code>   Year vTagID total Year_vTagID
+1  2010  46418     1  2010_46418
+2  2010  46419     1  2010_46419
+3  2010  46420     1  2010_46420
+4  2010  46421     1  2010_46421
+5  2010  46422     1  2010_46422
+6  2010  46423     1  2010_46423
+7  2010  46424     1  2010_46424
+8  2010  46425     1  2010_46425
+9  2010  46426     1  2010_46426
+10 2010  46427     1  2010_46427
+11 2010  46428     1  2010_46428
+12 2010  46429     1  2010_46429
+13 2010  46430     1  2010_46430
+14 2010  46431     1  2010_46431
+15 2010  46432     1  2010_46432
+16 2010  46433     1  2010_46433
+17 2010  46434     1  2010_46434
+18 2010  46435     1  2010_46435
+19 2010  46436     1  2010_46436
+20 2010  46437     1  2010_46437
+21 2010  46438     1  2010_46438
+22 2010  46439     1  2010_46439
+23 2010  46440     1  2010_46440
+24 2010  46441     1  2010_46441
+25 2010  46442     1  2010_46442
+26 2010  46443     1  2010_46443
+27 2010  46444     1  2010_46444
+28 2010  46445     1  2010_46445
+29 2010  46446     1  2010_46446
+30 2010  46447     1  2010_46447
+31 2010  46448     1  2010_46448
+32 2010  46449     1  2010_46449
+33 2010  46450     1  2010_46450
+34 2010  46451     1  2010_46451
+35 2010  46452     1  2010_46452
+36 2010  46453     1  2010_46453
+37 2010  46454     1  2010_46454
+38 2010  46455     1  2010_46455
+39 2010  46456     1  2010_46456
+40 2010  46457     1  2010_46457</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">masterCaps_byYear %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">filter</span>(Year_vTagID %in%<span class="st"> </span>Eglin_byYear$Year_vTagID) %&gt;%<span class="st"> </span>
 <span class="st">    </span>as.data.frame</code></pre></div>
-<pre><code>  Year vTagID total Year_vTagID
-1 2010  46441     1  2010_46441</code></pre>
+<pre><code>   Year vTagID total Year_vTagID
+1  2010  46418     1  2010_46418
+2  2010  46419     1  2010_46419
+3  2010  46420     1  2010_46420
+4  2010  46421     1  2010_46421
+5  2010  46422     1  2010_46422
+6  2010  46423     1  2010_46423
+7  2010  46424     1  2010_46424
+8  2010  46425     1  2010_46425
+9  2010  46426     1  2010_46426
+10 2010  46427     1  2010_46427
+11 2010  46428     1  2010_46428
+12 2010  46429     1  2010_46429
+13 2010  46430     1  2010_46430
+14 2010  46431     1  2010_46431
+15 2010  46432     1  2010_46432
+16 2010  46433     1  2010_46433
+17 2010  46434     1  2010_46434
+18 2010  46435     1  2010_46435
+19 2010  46436     1  2010_46436
+20 2010  46437     1  2010_46437
+21 2010  46438     1  2010_46438
+22 2010  46439     1  2010_46439
+23 2010  46440     1  2010_46440
+24 2010  46441     2  2010_46441
+25 2010  46442     1  2010_46442
+26 2010  46443     1  2010_46443
+27 2010  46444     1  2010_46444
+28 2010  46445     1  2010_46445
+29 2010  46446     1  2010_46446
+30 2010  46447     1  2010_46447
+31 2010  46448     1  2010_46448
+32 2010  46449     1  2010_46449
+33 2010  46450     1  2010_46450
+34 2010  46451     1  2010_46451
+35 2010  46452     1  2010_46452
+36 2010  46453     1  2010_46453
+37 2010  46454     1  2010_46454
+38 2010  46455     1  2010_46455
+39 2010  46456     1  2010_46456
+40 2010  46457     1  2010_46457</code></pre>
 </div>
 <div id="vtagids-not-in-master" class="section level2">
 <h2><span class="header-section-number">3.3</span> <code>vTagID</code>s not in master</h2>
-<p>Now I check how many unique <code>vTagID</code>s present in <code>Eglin</code> are not present in the master capture data frame. We find that 114 out of 120 unique <code>vTagID</code>s in <code>Eglin</code> are not present in the master capture data frame.</p>
+<p>Now I check how many unique <code>vTagID</code>s present in <code>Eglin</code> are not present in the master capture data frame. We find that 80 out of 120 unique <code>vTagID</code>s in <code>Eglin</code> are not present in the master capture data frame.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">length</span>(<span class="kw">unique</span>(Eglin$vTagID)[!<span class="st"> </span><span class="kw">unique</span>(Eglin$vTagID) %in%<span class="st"> </span>masterCaps$vTagID])</code></pre></div>
-<pre><code>[1] 114</code></pre>
+<pre><code>[1] 80</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">length</span>(<span class="kw">unique</span>(Eglin$vTagID))</code></pre></div>
 <pre><code>[1] 120</code></pre>
 </div>
@@ -327,21 +405,20 @@ master_comp &lt;-<span class="st"> </span>masterCaps %&gt;%<span class="st"> </s
 <p>Using the <code>Date_vTagID</code> column, I find that a little over half of the 406 rows in <code>allGS</code> are not present in the master capture data frame.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">allGS_comp %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">filter</span>(!<span class="st"> </span>Date_vTagID %in%<span class="st"> </span>master_comp$Date_vTagID)</code></pre></div>
-<pre><code>Source: local data frame [212 x 5]
-
-               Site       Date vTagID        PIT_Tag      Date_vTagID
-              &lt;chr&gt;     &lt;time&gt;  &lt;int&gt;          &lt;chr&gt;            &lt;chr&gt;
-1  Ochlocknee River 2011-08-26   6505 3D9.1C2CFB0FAE  2011-08-26_6505
-2  Ochlocknee River 2011-08-26   6506 3D9.1C2CC950CF  2011-08-26_6506
-3  Ochlocknee River 2011-08-26   6507 3D9.1C2CCA475D  2011-08-26_6507
-4  Ochlocknee River 2011-08-26   6508 3D9.1C2C57F60C  2011-08-26_6508
-5  Ochlocknee River 2011-08-26   6509 3D9.1C2C57F3C3  2011-08-26_6509
-6  Ochlocknee River 2011-08-26   6512 3D9.1C2CBE6B5F  2011-08-26_6512
-7  Ochlocknee River 2011-08-26   6513 3D9.1C2CFCABB7  2011-08-26_6513
-8  Ochlocknee River 2011-08-10  19298 3D9.1C2C9C19B5 2011-08-10_19298
-9  Ochlocknee River 2011-08-10  19299 3D9.1C2C59B8C3 2011-08-10_19299
-10 Ochlocknee River 2011-08-10  19300 3D9.1BF20FBD4A 2011-08-10_19300
-..              ...        ...    ...            ...              ...</code></pre>
+<pre><code># A tibble: 132 × 5
+                   Site       Date vTagID        PIT_Tag      Date_vTagID
+                  &lt;chr&gt;     &lt;dttm&gt;  &lt;int&gt;          &lt;chr&gt;            &lt;chr&gt;
+1          Yellow River 2011-09-26  30549 3D9.1BF2016B1A 2011-09-26_30549
+2      Blackwater River 2010-10-05  45725 3D9.iC2D09F193 2010-10-05_45725
+3      Blackwater River 2010-10-15  45734 3D9.1C2C57F6FE 2010-10-15_45734
+4      Blackwater River 2010-10-05  45738 3D9.1BF20FA04B 2010-10-05_45738
+5      Blackwater River 2010-10-05  45741 3D9.1C2CC2B9BA 2010-10-05_45741
+6      Blackwater River 2010-10-05  45759 3D9.1C2CC9427A 2010-10-05_45759
+7      Blackwater River 2010-10-15  45763 3D9.1C2CC94807 2010-10-15_45763
+8      Blackwater River 2010-10-05  45766 3D9.1C2C9BE893 2010-10-05_45766
+9  Choctawhatchee River 2010-10-09  45858 3D9.1BF20F4770 2010-10-09_45858
+10         Yellow River       &lt;NA&gt;  46162           &lt;NA&gt;         NA_46162
+# ... with 122 more rows</code></pre>
 </div>
 </div>
 <div id="comparing-filtdet-to-master" class="section level1">
@@ -349,19 +426,19 @@ master_comp &lt;-<span class="st"> </span>masterCaps %&gt;%<span class="st"> </s
 <p>This data frame contains dates where individuals were detected on a receiver array, <em>not</em> when they were captured, as in the master capture data frame (<code>masterCaps</code>). Thus I will not compare <code>Date</code>–<code>vTagID</code> combinations, just <code>vTagID</code>s.</p>
 <div id="vtagids-from-filtdet-in-mastercaps" class="section level2">
 <h2><span class="header-section-number">5.1</span> vTagIDs from <code>filtDet</code> in <code>masterCaps</code></h2>
-<p>First, I find that 304 out of 763 unique <code>vTagID</code>s from <code>filtDet</code> are already in the master capture data frame.</p>
+<p>First, I find that 176 out of 761 unique <code>vTagID</code>s from <code>filtDet</code> are not already in the master capture data frame.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">length</span>(<span class="kw">unique</span>(filtDet$vTagID)[!<span class="st"> </span><span class="kw">unique</span>(filtDet$vTagID) %in%<span class="st"> </span>masterCaps$vTagID])</code></pre></div>
-<pre><code>[1] 304</code></pre>
+<pre><code>[1] 176</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">length</span>(<span class="kw">unique</span>(filtDet$vTagID))</code></pre></div>
-<pre><code>[1] 763</code></pre>
+<pre><code>[1] 761</code></pre>
 </div>
 <div id="vtagids-from-mastercaps-in-filtdet" class="section level2">
 <h2><span class="header-section-number">5.2</span> vTagIDs from <code>masterCaps</code> in <code>filtDet</code></h2>
-<p>I also find that 459 out of 521 unique <code>vTagID</code>s from <code>masterCaps</code> that are already in <code>filtDet</code>.</p>
+<p>I also find that 585 out of 701 unique <code>vTagID</code>s from <code>masterCaps</code> that are already in <code>filtDet</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">length</span>(<span class="kw">unique</span>(masterCaps$vTagID)[ <span class="kw">unique</span>(masterCaps$vTagID) %in%<span class="st"> </span>filtDet$vTagID])</code></pre></div>
-<pre><code>[1] 459</code></pre>
+<pre><code>[1] 585</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">length</span>(<span class="kw">unique</span>(masterCaps$vTagID))</code></pre></div>
-<pre><code>[1] 521</code></pre>
+<pre><code>[1] 701</code></pre>
 </div>
 <div id="filtdet-to-mastercaps-comparison-table" class="section level2">
 <h2><span class="header-section-number">5.3</span> <code>filtDet</code> to <code>masterCaps</code> comparison table</h2>
@@ -388,7 +465,6 @@ master_comp &lt;-<span class="st"> </span>masterCaps %&gt;%<span class="st"> </s
 </div>
 <div id="session-information" class="section level1">
 <h1><span class="header-section-number">6</span> Session information</h1>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">session_info</span>()</code></pre></div>
 <pre><code>Session info --------------------------------------------------------------</code></pre>
 <pre><code> setting  value                       
  version  R version 3.3.0 (2016-05-03)
@@ -396,32 +472,33 @@ master_comp &lt;-<span class="st"> </span>masterCaps %&gt;%<span class="st"> </s
  ui       RStudio (0.99.902)          
  language (EN)                        
  collate  en_US.UTF-8                 
- tz       America/New_York            
- date     2016-06-17                  </code></pre>
+ tz       America/Chicago             
+ date     2016-09-26                  </code></pre>
 <pre><code>Packages ------------------------------------------------------------------</code></pre>
 <pre><code> package    * version date       source        
  assertthat   0.1     2013-12-06 CRAN (R 3.3.0)
- DBI          0.4-1   2016-05-08 CRAN (R 3.3.0)
- devtools     1.11.1  2016-04-21 CRAN (R 3.3.0)
- digest       0.6.9   2016-01-08 CRAN (R 3.3.0)
- dplyr      * 0.4.3   2015-09-01 CRAN (R 3.3.0)
+ DBI          0.5-1   2016-09-10 CRAN (R 3.3.0)
+ devtools     1.12.0  2016-06-24 CRAN (R 3.3.0)
+ digest       0.6.10  2016-08-02 CRAN (R 3.3.0)
+ dplyr      * 0.5.0   2016-06-24 CRAN (R 3.3.0)
  evaluate     0.9     2016-04-29 CRAN (R 3.3.0)
  formatR      1.4     2016-05-09 CRAN (R 3.3.0)
  htmltools    0.3.5   2016-03-21 CRAN (R 3.3.0)
- knitr        1.13    2016-05-09 CRAN (R 3.3.0)
+ knitr        1.14    2016-08-13 CRAN (R 3.3.0)
  lazyeval     0.2.0   2016-06-12 CRAN (R 3.3.0)
  magrittr     1.5     2014-11-22 CRAN (R 3.3.0)
  memoise      1.0.0   2016-01-29 CRAN (R 3.3.0)
- R6           2.1.2   2016-01-26 CRAN (R 3.3.0)
- Rcpp         0.12.5  2016-05-14 CRAN (R 3.3.0)
- readr      * 0.2.2   2015-10-22 CRAN (R 3.3.0)
+ R6           2.1.3   2016-08-19 CRAN (R 3.3.0)
+ Rcpp         0.12.7  2016-09-05 CRAN (R 3.3.0)
+ readr      * 1.0.0   2016-08-03 CRAN (R 3.3.0)
  readxl     * 0.1.1   2016-03-28 CRAN (R 3.3.0)
- rmarkdown    0.9.6   2016-05-01 CRAN (R 3.3.0)
+ rmarkdown    1.0     2016-07-08 CRAN (R 3.3.0)
+ rstudioapi   0.6     2016-06-27 CRAN (R 3.3.0)
  stringi      1.1.1   2016-05-27 CRAN (R 3.3.0)
- stringr    * 1.0.0   2015-04-30 CRAN (R 3.3.0)
- tibble       1.0     2016-03-23 CRAN (R 3.3.0)
- tidyr      * 0.5.0   2016-06-12 CRAN (R 3.3.0)
- withr        1.0.1   2016-02-04 CRAN (R 3.3.0)
+ stringr    * 1.1.0   2016-08-19 CRAN (R 3.3.0)
+ tibble       1.2     2016-08-26 CRAN (R 3.3.0)
+ tidyr      * 0.6.0   2016-08-12 CRAN (R 3.3.0)
+ withr        1.0.2   2016-06-20 CRAN (R 3.3.0)
  yaml         2.1.13  2014-06-12 CRAN (R 3.3.0)</code></pre>
 <!---
 rmarkdown::render('cross_referencing.Rmd', output_file = 'cross_referencing.html')

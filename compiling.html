@@ -378,7 +378,7 @@ foo &lt;-<span class="st"> </span>function(x){x **<span class="st"> </span><span
 <span class="st">    </span><span class="kw">lapply</span>(., gatherByPIT) %&gt;%<span class="st"> </span>
 <span class="st">    </span>bind_rows
 allSites</code></pre></div>
-<pre><code># A tibble: 1,364 x 8
+<pre><code># A tibble: 1,364 × 8
                  Site       Date vTagID vSerial TL_mm FL_mm        PIT_Tag
                 &lt;chr&gt;     &lt;date&gt;  &lt;dbl&gt;   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;          &lt;chr&gt;
 1  Apalachicola River 2010-10-24  46175    &lt;NA&gt;  1900  1770 3D9.1C2CCE537C
@@ -404,13 +404,13 @@ get_sys &lt;-<span class="st"> </span>function(sites){
 get_sub &lt;-<span class="st"> </span>function(sites){
     <span class="kw">sapply</span>(sites, function(x){name_df$Subsystem[name_df$Site ==<span class="st"> </span>x]})
 }
-allSites &lt;-<span class="st"> </span>allSites %&gt;%<span class="st"> </span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">System =</span> <span class="kw">get_sys</span>(Site), <span class="dt">Subsystem =</span> <span class="kw">get_sub</span>(Site)) %&gt;%
+cleanSites &lt;-<span class="st"> </span>allSites %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">System =</span> <span class="kw">get_sys</span>(Site), <span class="dt">Subsystem =</span> <span class="kw">get_sub</span>(Site), 
+           <span class="dt">vTagID =</span> <span class="kw">as.integer</span>(vTagID)) %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">select</span>(System, Subsystem, Date, vTagID, vSerial, TL_mm, FL_mm, PIT_Tag, Internal)</code></pre></div>
 </div>
 <div id="session-information" class="section level1">
 <h1><span class="header-section-number">6</span> Session information</h1>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">session_info</span>()</code></pre></div>
 <pre><code>Session info --------------------------------------------------------------</code></pre>
 <pre><code> setting  value                       
  version  R version 3.3.0 (2016-05-03)
@@ -419,11 +419,11 @@ allSites &lt;-<span class="st"> </span>allSites %&gt;%<span class="st"> </span>
  language (EN)                        
  collate  en_US.UTF-8                 
  tz       America/Chicago             
- date     2016-08-30                  </code></pre>
+ date     2016-09-26                  </code></pre>
 <pre><code>Packages ------------------------------------------------------------------</code></pre>
 <pre><code> package    * version date       source        
  assertthat   0.1     2013-12-06 CRAN (R 3.3.0)
- DBI          0.5     2016-08-11 CRAN (R 3.3.0)
+ DBI          0.5-1   2016-09-10 CRAN (R 3.3.0)
  devtools     1.12.0  2016-06-24 CRAN (R 3.3.0)
  digest       0.6.10  2016-08-02 CRAN (R 3.3.0)
  dplyr      * 0.5.0   2016-06-24 CRAN (R 3.3.0)
@@ -435,13 +435,13 @@ allSites &lt;-<span class="st"> </span>allSites %&gt;%<span class="st"> </span>
  magrittr     1.5     2014-11-22 CRAN (R 3.3.0)
  memoise      1.0.0   2016-01-29 CRAN (R 3.3.0)
  R6           2.1.3   2016-08-19 CRAN (R 3.3.0)
- Rcpp         0.12.6  2016-07-19 CRAN (R 3.3.0)
+ Rcpp         0.12.7  2016-09-05 CRAN (R 3.3.0)
  readr      * 1.0.0   2016-08-03 CRAN (R 3.3.0)
  readxl     * 0.1.1   2016-03-28 CRAN (R 3.3.0)
  rmarkdown    1.0     2016-07-08 CRAN (R 3.3.0)
  stringi      1.1.1   2016-05-27 CRAN (R 3.3.0)
  stringr    * 1.1.0   2016-08-19 CRAN (R 3.3.0)
- tibble       1.1     2016-07-04 CRAN (R 3.3.0)
+ tibble       1.2     2016-08-26 CRAN (R 3.3.0)
  tidyr      * 0.6.0   2016-08-12 CRAN (R 3.3.0)
  withr        1.0.2   2016-06-20 CRAN (R 3.3.0)
  yaml         2.1.13  2014-06-12 CRAN (R 3.3.0)</code></pre>

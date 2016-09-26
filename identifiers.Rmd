@@ -30,7 +30,7 @@ knitr::read_chunk('identifiers.R')
 
 ## Required objects
 
-We need the `allSites` data frame created in the compiling stage. The `rm` command 
+We need the `cleanSites` data frame created in the compiling stage. The `rm` command 
 removes all other objects created in `compiling.R`.
 ```{r sourceCompiling}
 ```
@@ -87,6 +87,9 @@ and vice versa, from the `vTagID_PIT` data frame.
 I will later be adding rows to the `vTagID_PIT` reference data frame, and even 
 though I am creating these functions now, they will use the updated version of
 `vTagID_PIT` if they're called after the changes are made to the data frame.
+Each of these functions uses an inner function that works for a single input
+`vTagID`/`PIT_Tag`, then uses the `sapply` function to apply that inner function to
+a vector.
 
 ```{r vTag_PIT_lookup_Funs}
 ```
@@ -158,10 +161,10 @@ of each capture containing an equivalent `vTagID`.
 
 ```{r equivRows, eval = FALSE}
 equivRows <-
-    allSites %>%
+    cleanSites %>%
     filter(vTagID %in% equiv_vTagID$input, 
            PIT_Tag %in% equiv_vTagID_PIT$PIT_Tag) %>% 
-    arrange(Site, PIT_Tag, vTagID)
+    arrange(System, Subsystem, PIT_Tag, vTagID)
 
 write_csv(equivRows, './csv_out/equivalent_vTagIDs.csv')
 ```
@@ -201,7 +204,7 @@ I first assigned an object for the maximum number of `vTagID`s for any given `PI
 
 I next made the data frame of `PIT_Tag`s and `vTagID`s into a data frame of all `PIT_Tag`s
 with a `vTagID`. If more than one `vTagID` is associated with a given `PIT_Tag`, I used 
-the newest `vTagID`. I lastly added a `"River"` column by referencing the `allSites`
+the newest `vTagID`. I lastly added a `"River"` column by referencing the `cleanSites`
 data frame.
 
 ```{r PITs_w_vTag}
@@ -247,19 +250,11 @@ with the newest `vTagID` that represents the same individual.
 
 By cross-referencing with the data frame of known `vTagID`s for `PIT_Tag`s, I filled
 in some rows that don't have `vTagID`s, but do have `PIT_Tag`s. I combined these rows 
-with those from `allSites` that already have valid (i.e., non-`NA`) `vTagID`s to create
+with those from `cleanSites` that already have valid (i.e., non-`NA`) `vTagID`s to create
 a data frame of all observations with known identifiers.
 
 To avoid creating temporary objects, both sets of rows were created on the fly as data 
 frames within a list.
-
-In creating the second data frame (with `NA` vTagIDs but valid PIT tags), I'm wrapping 
-the `PIT_to_vTagID` function inside the `Vectorize` function so that the new 
-"vectorized" function uses and returns a vector. 
-I could have also used `sapply` as I did above, but `Vectorize` was simpler in 
-this case, since I'd already created the base function.
-For more information on vectorization, see
-[here](http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html).
 
 ```{r knownID_master}
 ```
@@ -278,7 +273,7 @@ write_csv(masterCaps, './csv_out/masterCaps.csv')
 # Session information
 
 
-```{r session_info, include = TRUE, echo = TRUE, results = 'markup'}
+```{r session_info, include = TRUE, echo = FALSE, results = 'markup'}
 devtools::session_info()
 ```
 

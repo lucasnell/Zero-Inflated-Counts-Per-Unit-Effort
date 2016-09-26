@@ -17,7 +17,7 @@ rm(list = ls(pattern = '_df|gather'))
 
 
 ## @knitr unique_PITs_per_vTag
-unique_PITs_Tab <- allSites %>% 
+unique_PITs_Tab <- cleanSites %>% 
     filter(!is.na(vTagID), !is.na(PIT_Tag)) %>%
     group_by(vTagID) %>%
     summarize(uniquePITs = length(unique(PIT_Tag))) %>%
@@ -27,7 +27,7 @@ unique_PITs_Tab
 
 
 ## @knitr unique_vTags_per_PIT
-unique_vTags_Tab <- allSites %>%
+unique_vTags_Tab <- cleanSites %>%
     filter(!is.na(vTagID), !is.na(PIT_Tag)) %>%
     group_by(PIT_Tag) %>%
     summarize(uniquevTagIDs = length(unique(vTagID))) %>%
@@ -45,7 +45,7 @@ maxUniques <- c(as.numeric(attr(unique_PITs_Tab, 'dimnames')$.),
 
 
 ## @knitr vTag_PIT_lookup_DF
-vTagID_PIT <- allSites %>%
+vTagID_PIT <- cleanSites %>%
     filter(!is.na(vTagID), !is.na(PIT_Tag)) %>%
     distinct(vTagID, PIT_Tag) %>%
     select(vTagID, PIT_Tag)
@@ -53,27 +53,27 @@ vTagID_PIT <- allSites %>%
 
 
 ## @knitr vTag_PIT_lookup_Funs
-vTagID_to_PITs <- function(in_vTagID){
-    out_PIT <- (vTagID_PIT %>%
-                    filter(vTagID == as.numeric(in_vTagID)) %>%
-                    select(PIT_Tag))[[1]]
-    return(out_PIT)
+vTagID_to_PITs <- function(in_vTagIDs){
+    one_vTagID <- function(in_vTagID){
+        as.character(filter(vTagID_PIT, vTagID == as.integer(in_vTagID))$PIT_Tag)
+    }
+    return(sapply(in_vTagIDs, one_vTagID, USE.NAMES = FALSE))
 }
 
-PIT_to_vTagID <- function(in_PIT){
-    out_vTagID <- (vTagID_PIT %>%
-                       filter(PIT_Tag == as.character(in_PIT)) %>%
-                       select(vTagID))[[1]]
-    return(out_vTagID)
+PIT_to_vTagID <- function(in_PITs){
+    one_PIT <- function(in_PIT){
+        as.integer(filter(vTagID_PIT, PIT_Tag == as.character(in_PIT))$vTagID)
+    }
+    return(sapply(in_PITs, one_PIT, USE.NAMES = FALSE))
 }
 
 
 
 ## @knitr newest_vTagID_fun
-findNewest_vTagID <- function(focal_vTagIDs, refDF = allSites){
+findNewest_vTagID <- function(focal_vTagIDs, refDF = cleanSites){
     new_vTagID <- (refDF %>%
                        filter(vTagID %in% 
-                                  as.numeric(focal_vTagIDs[!is.na(focal_vTagIDs)])) %>%
+                                  as.integer(focal_vTagIDs[!is.na(focal_vTagIDs)])) %>%
                        arrange(desc(Date)))$vTagID[1]
     return(new_vTagID)
 }
@@ -91,8 +91,8 @@ equiv_vTagID_PIT <-
              fill = 'right') %>%
     # Remove rows where only one vTagID matches with the PIT_Tag
     filter(!is.na(vTagID_2)) %>%
-    # Convert vTagID columns back to numeric for compatibility with `allSites` data frame
-    mutate_each(funs(as.numeric), starts_with('vTagID')) %>%
+    # Convert vTagID columns back to integer for compatibility with `cleanSites` data frame
+    mutate_each(funs(as.integer), starts_with('vTagID')) %>%
     # Using 'standard evaluation' by using `select_`, which allows use of `maxUniques`
     select_(.dots = c(paste0('vTagID_', seq(maxUniques)), 'PIT_Tag'))
 
@@ -129,8 +129,8 @@ vTagID_PIT_NewRows <- equiv_vTagID %>%
     separate(vTagIDs, paste0('vTagIDs_', seq(10)), sep = ':', 
              fill = 'right') %>%
     gather(vTagID_name, vTagID, -PIT_Tag, na.rm = TRUE) %>%
-    # Make vTagID numeric for compatibility
-    mutate(vTagID = as.numeric(vTagID)) %>%
+    # Make vTagID integer for compatibility
+    mutate(vTagID = as.integer(vTagID)) %>%
     select(-vTagID_name) %>%
     # Filter for unique combinations
     distinct(vTagID, PIT_Tag)
@@ -160,13 +160,15 @@ PITs_w_vTag <- vTagID_PIT %>%
     summarize(vTagID_new = findNewest_vTagID(vTagID)) %>%
     rename(vTagID = vTagID_new) %>%
     mutate(
-        River = sapply(PIT_Tag, function(x){
-            tail(allSites$Site[allSites$PIT_Tag == x] %>% na.omit, 1)}, 
+        System = sapply(PIT_Tag, function(x){
+            tail(cleanSites$System[cleanSites$PIT_Tag == x] %>% na.omit, 1)}, 
+            USE.NAMES = FALSE),
+        Subsystem = sapply(PIT_Tag, function(x){
+            tail(cleanSites$Subsystem[cleanSites$PIT_Tag == x] %>% na.omit, 1)}, 
             USE.NAMES = FALSE)
     ) %>%
-    arrange(River, PIT_Tag) %>%
-    select(River, PIT_Tag, vTagID)
-
+    arrange(System, Subsystem, PIT_Tag) %>%
+    select(System, Subsystem, PIT_Tag, vTagID)
 
 
 
@@ -182,7 +184,7 @@ dropped_vTagIDs <- equiv_vTagID %>%
 
 
 ## @knitr newestID_master
-allSites_newIDs <- allSites %>%
+cleanSites_newIDs <- cleanSites %>%
     mutate(
         vTagID = sapply(vTagID, 
                         function(x){
@@ -195,13 +197,12 @@ allSites_newIDs <- allSites %>%
 ## @knitr knownID_master
 masterCaps <- list(
     # valid vTagIDs:
-    allSites_newIDs %>% filter(!is.na(vTagID)),
+    cleanSites_newIDs %>% filter(!is.na(vTagID)),
     # NA vTagIDs, but valid PITs:
-    allSites_newIDs %>%
+    cleanSites_newIDs %>%
         filter(is.na(vTagID),
                PIT_Tag %in% vTagID_PIT$PIT_Tag) %>%
-        mutate(vTagID = Vectorize(PIT_to_vTagID, 'in_PIT', USE.NAMES = FALSE)(PIT_Tag))
+        mutate(vTagID = PIT_to_vTagID(PIT_Tag))
     ) %>% 
     bind_rows
-
 

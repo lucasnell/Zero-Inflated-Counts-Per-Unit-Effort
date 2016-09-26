@@ -15,7 +15,6 @@ output:
 mainfont: Helvetica
 geometry: margin=1in
 fontsize: 10pt
-runtime: shiny
 ---
 
 ```{r setup, echo = FALSE}
@@ -258,7 +257,7 @@ write_csv(masterCaps_inFD, './csv_out/masterCaps_inFD.csv')
 # Session information
 
 
-```{r session_info, include = TRUE, echo = TRUE, results = 'markup'}
+```{r session_info, include = TRUE, echo = FALSE, results = 'markup'}
 devtools::session_info()
 ```
 
